@@ -8,6 +8,7 @@ This project implements a 4 Wheel Differential Drive QR Code Following Bot with 
 * Autonomous Return: The bot can autonomously return to its starting position after following a QR code.
 * SLAM Integration: Built-in SLAM for mapping and localization.
 * ROS2 Integration: Uses ros2_control, Nav2, and slam_toolbox for navigation, SLAM, and control.
+* GPS waypoint navigation - under development
 
 ### Prerequisites: 
 * ROS2 Humble
@@ -26,6 +27,11 @@ This project implements a 4 Wheel Differential Drive QR Code Following Bot with 
    ros2 launch bot_description gazebo.launch.py world_name={test_new/small_house/small_warehouse/empty/room_with_walls}
 
    ```
+2. Launch Gazebo Simulation in world with GPS enabled
+```sh
+ros2 launch bot_description gps.launch.py world_name=empty
+
+```
 3. Launch Keyboard Teleop with ros2_control
    ```js
    ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r /cmd_vel:=/bot_controller/cmd_vel_unstamped
