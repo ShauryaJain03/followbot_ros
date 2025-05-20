@@ -9,6 +9,7 @@ This project implements a 4 Wheel Differential Drive QR Code Following Bot with 
 * SLAM Integration: Built-in SLAM for mapping and localization.
 * ROS2 Integration: Uses ros2_control, Nav2, and slam_toolbox for navigation, SLAM, and control.
 * GPS waypoint navigation - under development
+* Replace QR Codes with AprilTags for more robust detection.
 
 ### Prerequisites: 
 * ROS2 Humble
