@@ -23,41 +23,46 @@ This project implements a 4 Wheel Differential Drive QR Code Following Bot with 
    ros2 launch urdf_tutorial display.launch.py model:=/home/shaurya/armybot_diff/src/bot_description/urdf/bot.urdf.xacro
 
    ```
-2. Launch Gazebo Simulation in Custom World
+3. Launch Gazebo Simulation in Custom World
    ```sh
    ros2 launch bot_description gazebo.launch.py world_name={test_new/small_house/small_warehouse/empty/room_with_walls}
 
    ```
-2. Launch Gazebo Simulation in world with GPS enabled
+4. Launch robot controller 
 ```sh
 ros2 launch bot_description gps.launch.py world_name=empty
 
 ```
-3. Launch Keyboard Teleop with ros2_control
+5. Launch Gazebo Simulation in world with GPS enabled
+```sh
+ros2 launch bot_controller controller.launch.py
+
+```
+6. Launch Keyboard Teleop with ros2_control
    ```js
    ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r /cmd_vel:=/bot_controller/cmd_vel_unstamped
 
    ```
-4. Run Computer Vision Node (QR Code Detection) with LiDAR based obstacle avoidance
+7. Run Computer Vision Node (QR Code Detection) with LiDAR based obstacle avoidance
    ```sh
    ros2 run bot_vision obstacle_avoidance
    ```
-5. SLAM with slam_toolbox
+8. SLAM with slam_toolbox
    ```sh
    ros2 launch slam_toolbox online_async_launch.py slam_params_file:=./src/bot_description/config/mapper_params_online_async.yaml use_sim_time:=true
    ```
-6. Switch from Mapping to Localization
+9. Switch from Mapping to Localization
    ```sh
    ros2 launch slam_toolbox online_async_launch.py slam_params_file:=./src/bot_description/config/mapper_params_online_async.yaml use_sim_time:=true
    ```
-7. Control the Robot with Twist Mux
+10. Control the Robot with Twist Mux
    ```sh
    ros2 run twist_mux twist_mux --ros-args --params-file ./src/bot_description/config/twist_mux.yaml -r cmd_vel_out:=bot_controller/cmd_vel_unstamped
 
    ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r /cmd_vel:=/cmd_vel_joy
 
    ```
-8. Navigation Using ROS2
+11. Navigation Using ROS2
    ```sh
    ros2 launch bot_description navigation_launch.py use_sim_time:=true
    ```
