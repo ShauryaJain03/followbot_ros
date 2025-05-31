@@ -31,12 +31,12 @@ This project implements a 4 Wheel Differential Drive QR Code Following Bot with 
    ```
 3. Launch robot controller 
    ```sh
-   ros2 launch bot_description gps.launch.py world_name=empty
+   ros2 launch bot_controller controller.launch.py
    
    ```
 4. Launch Gazebo Simulation in GPS Enabled World
    ```sh
-   ros2 launch bot_controller controller.launch.py
+   ros2 launch bot_description gps.launch.py world_name=empty
    
    ```
 5. Launch Keyboard Teleop with ros2_control
