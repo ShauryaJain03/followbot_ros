@@ -31,8 +31,7 @@
 
   <inertial>
     <mass value="2"/>
-    <inertia ixx="0.0883" ixy="0.0" ixz="0.0" 
-             iyy="0.1133" iyz="0.0" izz="0.187"/>
+    <inertia ixx="0.0817" iyy="0.1067" izz="0.18" ixy="0.0" ixz="0.0" iyz="0.0"/>
   </inertial>
 </link>
 
@@ -40,10 +39,7 @@
   <link name="wheel_front_right">
   <inertial>
     <mass value="0.5"/>  <!-- OK for small wheels -->
-    <inertia 
-      ixx="0.00025" ixy="0.0" ixz="0.0"
-      iyy="0.00025" iyz="0.0"
-      izz="0.0001"/>
+    <inertia ixx="0.00156" iyy="0.00156" izz="0.0025" ixy="0.0" ixz="0.0" iyz="0.0"/>
   </inertial>
 
   <visual>
@@ -65,10 +61,7 @@
   <link name="wheel_front_left">
   <inertial>
     <mass value="0.5"/>  <!-- OK for small wheels -->
-    <inertia 
-      ixx="0.00025" ixy="0.0" ixz="0.0"
-      iyy="0.00025" iyz="0.0"
-      izz="0.0001"/>
+    <inertia ixx="0.00156" iyy="0.00156" izz="0.0025" ixy="0.0" ixz="0.0" iyz="0.0"/>
   </inertial>
 
   <visual>
@@ -90,10 +83,7 @@
 <link name="wheel_back_right">
   <inertial>
     <mass value="0.5"/>  <!-- OK for small wheels -->
-    <inertia 
-      ixx="0.00025" ixy="0.0" ixz="0.0"
-      iyy="0.00025" iyz="0.0"
-      izz="0.0001"/>
+    <inertia ixx="0.00156" iyy="0.00156" izz="0.0025" ixy="0.0" ixz="0.0" iyz="0.0"/>
   </inertial>
 
   <visual>
@@ -115,10 +105,7 @@
 <link name="wheel_back_left">
   <inertial>
     <mass value="0.5"/> 
-    <inertia 
-      ixx="0.00025" ixy="0.0" ixz="0.0"
-      iyy="0.00025" iyz="0.0"
-      izz="0.0001"/>
+    <inertia ixx="0.00156" iyy="0.00156" izz="0.0025" ixy="0.0" ixz="0.0" iyz="0.0"/>
   </inertial>
 
   <visual>
@@ -136,9 +123,6 @@
     </geometry>
   </collision>
 </link>
-
-
-
 
   <link name="rgb_camera">
     <inertial>
@@ -160,7 +144,7 @@
 
     <collision>
       <geometry>
-          <box size="0.1 0.5 0.2"/>
+          <box size="0.1 0.1 0.1"/>
       </geometry>
     </collision>
   </link>
@@ -347,7 +331,7 @@
     <mu1>1.0</mu1>       
     <mu2>0.8</mu2>        
     <kp>100000.0</kp>     
-    <kd>1.0</kd>           
+    <kd>10.0</kd>           
     <minDepth>0.001</minDepth>   
     <maxVel>1</maxVel>         
     <fdir1>1 0 0</fdir1>     
@@ -357,7 +341,7 @@
     <mu1>1.0</mu1>       
     <mu2>0.8</mu2>        
     <kp>100000.0</kp>     
-    <kd>1.0</kd>           
+    <kd>10.0</kd>           
     <minDepth>0.001</minDepth>   
     <maxVel>1</maxVel>         
     <fdir1>1 0 0</fdir1>   
@@ -367,7 +351,7 @@
     <mu1>1.0</mu1>       
     <mu2>0.8</mu2>        
     <kp>100000.0</kp>     
-    <kd>1.0</kd>           
+    <kd>10.0</kd>           
     <minDepth>0.001</minDepth>   
     <maxVel>1</maxVel>         
     <fdir1>1 0 0</fdir1>   
@@ -377,7 +361,7 @@
     <mu1>1.0</mu1>       
     <mu2>0.8</mu2>          
     <kp>100000.0</kp>     
-    <kd>1.0</kd>           
+    <kd>10.0</kd>           
     <minDepth>0.001</minDepth>   
     <maxVel>1</maxVel>         
     <fdir1>1 0 0</fdir1>   

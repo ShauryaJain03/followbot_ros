@@ -76,8 +76,13 @@ def generate_launch_description():
         package="ros_gz_sim",
         executable="create",
         output="screen",
-        arguments=["-topic", "robot_description",
-                   "-name", "bot"],
+        arguments=[
+            "-topic", "robot_description",
+            "-name", "bot",
+            "-x", "10.0",   # set X position
+            "-y", "10.0",   # set Y position
+            "-z", "2.0"     # set Z position (this is the key fix)
+        ],
     )
 
     gz_ros2_bridge = Node(
