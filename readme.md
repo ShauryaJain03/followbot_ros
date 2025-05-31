@@ -3,18 +3,19 @@
 This project implements a 4 Wheel Differential Drive QR Code Following Bot with LiDAR-based Obstacle Avoidance and Autonomous Return
 
 ### Key Features:
+* ROS2 based software stack.
 * QR Code Following: Uses computer vision (YOLOv8) to detect and follow QR codes.
 * LiDAR-based Obstacle Avoidance: Avoids obstacles while following the QR code.
-* Autonomous Return: The bot can autonomously return to its starting position after following a QR code.
-* SLAM Integration: Built-in SLAM for mapping and localization.
-* ROS2 Integration: Uses ros2_control, Nav2, and slam_toolbox for navigation, SLAM, and control.
-* GPS waypoint navigation - under development
+* Mapless and Map based Autonomous Navigation - using nav2 and slam_toolbox
+
+### Features Under Development
+* GPS waypoint navigation 
 * Replace QR Codes with AprilTags for more robust detection - use tag36h11(id=0) for following and tag36h11(id=x) for other purposes.
 
 ### Prerequisites: 
 * ROS2 Humble
 * Ubuntu 22.04
-* Gazebo Fortress 6.16
+* Gazebo Fortress v6.16
 
 ### Setup
 
@@ -23,55 +24,61 @@ This project implements a 4 Wheel Differential Drive QR Code Following Bot with 
    ros2 launch urdf_tutorial display.launch.py model:=/home/shaurya/armybot_diff/src/bot_description/urdf/bot.urdf.xacro
 
    ```
-3. Launch Gazebo Simulation in Custom World
+2. Launch Gazebo Simulation in Custom World
    ```sh
    ros2 launch bot_description gazebo.launch.py world_name={test_new/small_house/small_warehouse/empty/room_with_walls}
 
    ```
-4. Launch robot controller 
-```sh
-ros2 launch bot_description gps.launch.py world_name=empty
-
-```
-5. Launch Gazebo Simulation in world with GPS enabled
-```sh
-ros2 launch bot_controller controller.launch.py
-
-```
-6. Launch Keyboard Teleop with ros2_control
+3. Launch robot controller 
+   ```sh
+   ros2 launch bot_description gps.launch.py world_name=empty
+   
+   ```
+4. Launch Gazebo Simulation in GPS Enabled World
+   ```sh
+   ros2 launch bot_controller controller.launch.py
+   
+   ```
+5. Launch Keyboard Teleop with ros2_control
    ```js
    ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r /cmd_vel:=/bot_controller/cmd_vel_unstamped
 
    ```
-7. Run Computer Vision Node (QR Code Detection) with LiDAR based obstacle avoidance
+6. Run Computer Vision Node (QR Code Detection) with LiDAR based obstacle avoidance
    ```sh
    ros2 run bot_vision obstacle_avoidance
    ```
-8. SLAM with slam_toolbox
+7. SLAM with slam_toolbox
    ```sh
    ros2 launch slam_toolbox online_async_launch.py slam_params_file:=./src/bot_description/config/mapper_params_online_async.yaml use_sim_time:=true
    ```
-9. Switch from Mapping to Localization
+8. Switch from Mapping to Localization - make change in the params file
    ```sh
    ros2 launch slam_toolbox online_async_launch.py slam_params_file:=./src/bot_description/config/mapper_params_online_async.yaml use_sim_time:=true
    ```
-10. Control the Robot with Twist Mux
+9. Control the Robot with Twist Mux
    ```sh
    ros2 run twist_mux twist_mux --ros-args --params-file ./src/bot_description/config/twist_mux.yaml -r cmd_vel_out:=bot_controller/cmd_vel_unstamped
 
    ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r /cmd_vel:=/cmd_vel_joy
 
    ```
-11. Navigation Using ROS2
-   ```sh
-   ros2 launch bot_description navigation_launch.py use_sim_time:=true
-   ```
-
+10. Navigation Using ROS2
+      ```sh
+      ros2 launch bot_description navigation_launch.py use_sim_time:=true
+      ```
+11. For Mapless Navigation - Launch Twist Mux node first and then proceed with following scripts
+    ```sh
+    ros2 launch slam_toolbox online_async_launch.py use_sim_time:=true
+   
+    ros2 launch bot_description navigation_launch.py use_sim_time:=true
+    
+    ```   
 
 <!-- USAGE EXAMPLES -->
 ### Usage
 
-Insert images
+Images to be updated soon
 
 <!-- Contributing -->
 ### Contributing
