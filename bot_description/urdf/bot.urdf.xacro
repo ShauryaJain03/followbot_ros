@@ -5,11 +5,6 @@
 
 
   <link name="base_footprint">
-      <inertial>
-            <mass value="2" />
-            <inertia ixx="0.04" ixy="0.0" ixz="0" 
-            iyy="0.17" iyz="0" izz="0.25" />
-    </inertial>
   </link>
     
   <joint name="base_joint" type="fixed">
@@ -18,133 +13,136 @@
     <origin xyz="0.0 0.0 0.15" rpy="0.0 0.0 3.14159"/>  
   </joint>
 
-  <link name="base_link">
-    <visual>
-      <geometry>
-          <box size=".8 0.7 0.2"/>
-      </geometry>
-      <material name="gray">
-        <color rgba=".2 .2 .2 1" />
-      </material>
-    </visual>
-    <inertial>
-            <mass value="2" />
-            <inertia ixx="0.04" ixy="0.0" ixz="0" 
-            iyy="0.17" iyz="0" izz="0.25" />
-    </inertial>
-    
-    <collision>
-      <geometry>
-          <box size=".8 0.7 0.2"/>
-      </geometry>
-    </collision>
-  </link>
+<link name="base_link">
+  <visual>
+    <geometry>
+      <box size="0.8 0.7 0.2"/>
+    </geometry>
+    <material name="gray">
+      <color rgba="0.2 0.2 0.2 1" />
+    </material>
+  </visual>
+
+  <collision>
+    <geometry>
+      <box size="0.8 0.7 0.2"/>
+    </geometry>
+  </collision>
+
+  <inertial>
+    <mass value="2"/>
+    <inertia ixx="0.0883" ixy="0.0" ixz="0.0" 
+             iyy="0.1133" iyz="0.0" izz="0.187"/>
+  </inertial>
+</link>
 
 
   <link name="wheel_front_right">
-    <inertial>
-            <mass value="2" />
-            <inertia ixx="1e-3" ixy="0.0" ixz="0" 
-            iyy="1e-3" iyz="0" izz="1e-3" />
-    </inertial>
+  <inertial>
+    <mass value="0.5"/>  <!-- OK for small wheels -->
+    <inertia 
+      ixx="0.00025" ixy="0.0" ixz="0.0"
+      iyy="0.00025" iyz="0.0"
+      izz="0.0001"/>
+  </inertial>
 
-    <visual>
-      
-      <geometry>
-          <cylinder radius="0.10" length="0.1"/>
-      </geometry>
-      <material name="white">
-        <color rgba="1 1 1 1"/>
-      </material>
-    </visual>
+  <visual>
+    <geometry>
+      <cylinder radius="0.10" length="0.05"/>
+    </geometry>
+    <material name="white">
+      <color rgba="1 1 1 1"/>
+    </material>
+  </visual>
 
-    <collision>
-    
-      <geometry>
-          <sphere radius="0.10"/>
-      </geometry>
-    </collision>
+  <collision>
+    <geometry>
+      <cylinder radius="0.10" length="0.05"/>
+    </geometry>
+  </collision>
   </link>
 
   <link name="wheel_front_left">
-    <inertial>
-            <mass value="2" />
-            <inertia ixx="1e-3" ixy="0.0" ixz="0" 
-            iyy="1e-3" iyz="0" izz="1e-3" />
-    </inertial>
+  <inertial>
+    <mass value="0.5"/>  <!-- OK for small wheels -->
+    <inertia 
+      ixx="0.00025" ixy="0.0" ixz="0.0"
+      iyy="0.00025" iyz="0.0"
+      izz="0.0001"/>
+  </inertial>
 
-    <visual>
-      
-      <geometry>
-          <cylinder radius="0.10" length="0.1"/>
-      </geometry>
-      <material name="white">
-        <color rgba="1 1 1 1"/>
-      </material>
-    </visual>
+  <visual>
+    <geometry>
+      <cylinder radius="0.10" length="0.05"/>
+    </geometry>
+    <material name="white">
+      <color rgba="1 1 1 1"/>
+    </material>
+  </visual>
 
-    <collision>
-      <geometry>
-          <sphere radius="0.10" />
-      </geometry>
-    </collision>
+  <collision>
+    <geometry>
+      <cylinder radius="0.10" length="0.05"/>
+    </geometry>
+  </collision>
   </link>
 
 <link name="wheel_back_right">
-    <inertial>
-            <mass value="2" />
-            <inertia ixx="1e-3" ixy="0.0" ixz="0" 
-            iyy="1e-3" iyz="0" izz="1e-3" />
-    </inertial>
+  <inertial>
+    <mass value="0.5"/>  <!-- OK for small wheels -->
+    <inertia 
+      ixx="0.00025" ixy="0.0" ixz="0.0"
+      iyy="0.00025" iyz="0.0"
+      izz="0.0001"/>
+  </inertial>
 
-    <visual>
-      
-      <geometry>
-          <cylinder radius="0.10" length="0.1"/>
-      </geometry>
-      <material name="white">
-        <color rgba="1 1 1 1"/>
-      </material>
-    </visual>
+  <visual>
+    <geometry>
+      <cylinder radius="0.10" length="0.05"/>
+    </geometry>
+    <material name="white">
+      <color rgba="1 1 1 1"/>
+    </material>
+  </visual>
 
-    <collision>
-      <geometry>
-          <sphere radius="0.10" />
-      </geometry>
-    </collision>
+  <collision>
+    <geometry>
+      <cylinder radius="0.10" length="0.05"/>
+    </geometry>
+  </collision>
   </link>
 
+<link name="wheel_back_left">
+  <inertial>
+    <mass value="0.5"/> 
+    <inertia 
+      ixx="0.00025" ixy="0.0" ixz="0.0"
+      iyy="0.00025" iyz="0.0"
+      izz="0.0001"/>
+  </inertial>
 
+  <visual>
+    <geometry>
+      <cylinder radius="0.10" length="0.05"/>
+    </geometry>
+    <material name="white">
+      <color rgba="1 1 1 1"/>
+    </material>
+  </visual>
 
-  <link name="wheel_back_left">
-    <inertial>
-            <mass value="2" />
-            <inertia ixx="1e-3" ixy="0.0" ixz="0" 
-            iyy="1e-3" iyz="0" izz="1e-3" />
-    </inertial>
+  <collision>
+    <geometry>
+      <cylinder radius="0.10" length="0.05"/>
+    </geometry>
+  </collision>
+</link>
 
-    <visual>
-      
-      <geometry>
-          <cylinder radius="0.10" length="0.1"/>
-      </geometry>
-      <material name="white">
-        <color rgba="1 1 1 1"/>
-      </material>
-    </visual>
-
-    <collision>
-      <geometry>
-          <sphere radius="0.10"/>
-      </geometry>
-    </collision>
-  </link>
 
 
 
   <link name="rgb_camera">
     <inertial>
-            <mass value="0.5" />
+            <mass value="0.05" />
             <inertia ixx="0.01" ixy="0.0" ixz="0" 
             iyy="0.01" iyz="0" izz="0.01" />
     </inertial>
@@ -175,31 +173,41 @@
 
   </joint>
 
+  <joint type="fixed" name="camera_optical_joint">
+    <origin xyz="0 0 0" rpy="-1.5707 0 -1.5707"/>
+    <child link="camera_link_optical"/>
+    <parent link="rgb_camera"/>
+  </joint>
+
+  <link name="camera_link_optical">
+  </link>
 
     <gazebo reference="rgb_camera">
-        <sensor name="camera" type="camera">
-            <always_on>true</always_on>
-            <update_rate>30.0</update_rate>
-            <visualize>true</visualize>
-            <topic>/camera/image_raw</topic>
-            <gz_frame_id>/rgb_camera</gz_frame_id>
-            <camera name="camera">
-            <horizontal_fov>1.21126</horizontal_fov>
-            <image>
-                <width>640</width>
-                <height>640</height>
-                <format>R8G8B8</format>
-            </image>
-            <distortion>
-                <k1>0.0</k1>
-                <k2>0.0</k2>
-                <k3>0.0</k3>
-                <p1>0.0</p1>
-                <p2>0.0</p2>
-                <center>0.5 0.5</center>
-            </distortion>
-            </camera>
-        </sensor>   
+    <sensor name="camera" type="camera">
+      <camera>
+        <horizontal_fov>1.3962634</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.1</near>
+          <far>15</far>
+        </clip>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.007</stddev>
+        </noise>
+        <optical_frame_id>camera_link_optical</optical_frame_id>
+        <camera_info_topic>camera/camera_info</camera_info_topic>
+      </camera>
+      <always_on>1</always_on>
+      <update_rate>20</update_rate>
+      <visualize>true</visualize>
+      <topic>camera/image_raw</topic>
+    </sensor>
     </gazebo>
 
 
@@ -235,7 +243,7 @@
   </joint>
 
     <!-- 2D LIDAR-->  
-<!--  <gazebo reference="laser_link">
+  <gazebo reference="laser_link">
     <sensor name="lidar" type="gpu_lidar">
       <always_on>true</always_on>
       <visualize>true</visualize>
@@ -262,43 +270,6 @@
           <stddev>0.01</stddev>
         </noise>
       </lidar>
-    </sensor>
-  </gazebo>--> 
-
-  <!-- velodyne vlp-32 3D lidar plugin-->
-  <gazebo reference="laser_link">
-    <sensor name="lidar" type="gpu_lidar">
-      <update_rate>10</update_rate>
-      <topic>scan</topic>
-      <gz_frame_id>laser_link</gz_frame_id>
-      <lidar>
-        <scan>
-          <horizontal>
-            <samples>720</samples>
-            <resolution>1</resolution>
-            <min_angle>-3.14156</min_angle>
-            <max_angle>3.14156</max_angle>
-          </horizontal>
-          <vertical>
-            <samples>32</samples>
-            <min_angle>-0.5353</min_angle>
-            <max_angle>0.1862</max_angle>
-          </vertical>
-        </scan>
-        <range>
-          <min>0.05</min>
-          <max>10.0</max>
-          <resolution>0.01</resolution>
-        </range>
-        <noise>
-            <type>gaussian</type>
-            <mean>0.0</mean>
-            <stddev>0.01</stddev>
-        </noise>
-        <frame_id>scan_link</frame_id>
-      </lidar>
-      <always_on>1</always_on>
-      <visualize>true</visualize>
     </sensor>
   </gazebo>
 
@@ -372,46 +343,44 @@
 
   </joint>
 
- 
-
     <gazebo reference="wheel_front_right">
-    <mu1>1000000000000000.0</mu1>
-    <mu2>1000000000000000.0</mu2>
-    <kp>1000000000000.0</kp>
-    <kd>10.0</kd>
-    <minDepth>0.001</minDepth>
-    <maxVel>0.1</maxVel>
-    <fdir1>1 0 0</fdir1>
+    <mu1>1.0</mu1>       
+    <mu2>0.8</mu2>        
+    <kp>100000.0</kp>     
+    <kd>1.0</kd>           
+    <minDepth>0.001</minDepth>   
+    <maxVel>1</maxVel>         
+    <fdir1>1 0 0</fdir1>     
     </gazebo>
 
     <gazebo reference="wheel_front_left">
-    <mu1>1000000000000000.0</mu1>
-    <mu2>1000000000000000.0</mu2>
-    <kp>1000000000000.0</kp>
-    <kd>10.0</kd>
-    <minDepth>0.001</minDepth>
-    <maxVel>0.1</maxVel>
-    <fdir1>1 0 0</fdir1>
+    <mu1>1.0</mu1>       
+    <mu2>0.8</mu2>        
+    <kp>100000.0</kp>     
+    <kd>1.0</kd>           
+    <minDepth>0.001</minDepth>   
+    <maxVel>1</maxVel>         
+    <fdir1>1 0 0</fdir1>   
     </gazebo>
 
     <gazebo reference="wheel_back_right">
-    <mu1>1000000000000000.0</mu1>
-    <mu2>1000000000000000.0</mu2>
-    <kp>1000000000000.0</kp>
-    <kd>10.0</kd>
-    <minDepth>0.001</minDepth>
-    <maxVel>0.1</maxVel>
-    <fdir1>1 0 0</fdir1>
+    <mu1>1.0</mu1>       
+    <mu2>0.8</mu2>        
+    <kp>100000.0</kp>     
+    <kd>1.0</kd>           
+    <minDepth>0.001</minDepth>   
+    <maxVel>1</maxVel>         
+    <fdir1>1 0 0</fdir1>   
     </gazebo>
 
     <gazebo reference="wheel_back_left">
-    <mu1>1000000000000000.0</mu1>
-    <mu2>1000000000000000.0</mu2>
-    <kp>1000000000000.0</kp>
-    <kd>10.0</kd>
-    <minDepth>0.001</minDepth>
-    <maxVel>0.1</maxVel>
-    <fdir1>1 0 0</fdir1>
+    <mu1>1.0</mu1>       
+    <mu2>0.8</mu2>          
+    <kp>100000.0</kp>     
+    <kd>1.0</kd>           
+    <minDepth>0.001</minDepth>   
+    <maxVel>1</maxVel>         
+    <fdir1>1 0 0</fdir1>   
     </gazebo>
 
     <gazebo>
@@ -427,7 +396,5 @@
         name="ignition::gazebo::systems::NavSat">
       </plugin>
     </gazebo>
-
-
 
 </robot>
