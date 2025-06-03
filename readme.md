@@ -26,7 +26,7 @@ This project implements a 4 Wheel Differential Drive QR Code Following Bot with 
    ```
 2. Launch Gazebo Simulation in Custom World
    ```sh
-   ros2 launch bot_description gazebo.launch.py world_name:={test_new/small_house/small_warehouse/empty/room_with_walls}
+   ros2 launch bot_description gazebo.launch.py world_name:={baylands/test_new/small_house/small_warehouse/empty/room_with_walls}
 
    ```
 3. Launch robot controller 
