@@ -79,9 +79,7 @@ def generate_launch_description():
         arguments=[
             "-topic", "robot_description",
             "-name", "bot",
-            "-x", "10.0",   # set X position
-            "-y", "10.0",   # set Y position
-            "-z", "2.0"     # set Z position (this is the key fix)
+            "-z", "2.0"     
         ],
     )
 
@@ -104,9 +102,6 @@ def generate_launch_description():
         executable="image_bridge",
         arguments=["/camera/image_raw"]
     )
-
-
-
 
     return LaunchDescription([
         model_arg,

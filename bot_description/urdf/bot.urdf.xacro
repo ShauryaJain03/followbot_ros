@@ -60,7 +60,7 @@
 
   <link name="wheel_front_left">
   <inertial>
-    <mass value="0.5"/>  <!-- OK for small wheels -->
+    <mass value="0.5"/>  
     <inertia ixx="0.00156" iyy="0.00156" izz="0.0025" ixy="0.0" ixz="0.0" iyz="0.0"/>
   </inertial>
 
@@ -82,7 +82,7 @@
 
 <link name="wheel_back_right">
   <inertial>
-    <mass value="0.5"/>  <!-- OK for small wheels -->
+    <mass value="0.5"/>  
     <inertia ixx="0.00156" iyy="0.00156" izz="0.0025" ixy="0.0" ixz="0.0" iyz="0.0"/>
   </inertial>
 
@@ -227,7 +227,7 @@
   </joint>
 
     <!-- 2D LIDAR-->  
-  <gazebo reference="laser_link">
+<!--  <gazebo reference="laser_link">
     <sensor name="lidar" type="gpu_lidar">
       <always_on>true</always_on>
       <visualize>true</visualize>
@@ -255,6 +255,43 @@
         </noise>
       </lidar>
     </sensor>
+  </gazebo>--> 
+
+    <!-- velodyne vlp-32 3D lidar plugin-->
+  <gazebo reference="laser_link">
+    <sensor name="lidar" type="gpu_lidar">
+      <update_rate>10</update_rate>
+      <topic>scan</topic>
+      <gz_frame_id>laser_link</gz_frame_id>
+      <lidar>
+        <scan>
+          <horizontal>
+            <samples>720</samples>
+            <resolution>1</resolution>
+            <min_angle>-3.14156</min_angle>
+            <max_angle>3.14156</max_angle>
+          </horizontal>
+          <vertical>
+            <samples>32</samples>
+            <min_angle>-0.5353</min_angle>
+            <max_angle>0.1862</max_angle>
+          </vertical>
+        </scan>
+        <range>
+          <min>0.05</min>
+          <max>50.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+            <type>gaussian</type>
+            <mean>0.0</mean>
+            <stddev>0.01</stddev>
+        </noise>
+        <frame_id>scan_link</frame_id>
+      </lidar>
+      <always_on>1</always_on>
+      <visualize>true</visualize>
+    </sensor>
   </gazebo>
 
   <joint name="navsat_joint" type="fixed">
@@ -274,17 +311,58 @@
 
   <link name="imu_link">
   </link>
-
-  <gazebo reference="imu_link">
-    <sensor name="imu" type="imu">
-      <always_on>1</always_on>
-      <update_rate>50</update_rate>
-      <visualize>true</visualize>
-      <topic>imu</topic>
-      <enable_metrics>true</enable_metrics>
-      <gz_frame_id>imu_link</gz_frame_id>
-    </sensor>
-  </gazebo>
+  
+   <gazebo reference="imu_link">
+      <sensor name="imu" type="imu">
+          <always_on>true</always_on>
+          <update_rate>100</update_rate>
+          <gz_frame_id>imu_link</gz_frame_id>
+          <topic>imu</topic>
+          <imu>
+            <angular_velocity>
+              <x>
+                <noise type="gaussian">
+                  <mean>0.0</mean>
+                  <stddev>2e-4</stddev>
+                </noise>
+              </x>
+              <y>
+                <noise type="gaussian">
+                  <mean>0.0</mean>
+                  <stddev>2e-4</stddev>
+                </noise>
+              </y>
+              <z>
+                <noise type="gaussian">
+                  <mean>0.0</mean>
+                  <stddev>2e-4</stddev>
+                </noise>
+              </z>
+            </angular_velocity>
+            <linear_acceleration>
+              <x>
+                <noise type="gaussian">
+                  <mean>0.0</mean>
+                  <stddev>1.7e-2</stddev>
+                </noise>
+              </x>
+              <y>
+                <noise type="gaussian">
+                  <mean>0.0</mean>
+                  <stddev>1.7e-2</stddev>
+                </noise>
+              </y>
+              <z>
+                <noise type="gaussian">
+                  <mean>0.0</mean>
+                  <stddev>1.7e-2</stddev>
+                </noise>
+              </z>
+            </linear_acceleration>
+            
+          </imu>
+      </sensor>
+    </gazebo>
 
   <gazebo reference="navsat_link">
     <sensor name="navsat" type="navsat">
