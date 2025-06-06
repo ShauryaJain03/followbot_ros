@@ -10,7 +10,7 @@ This project implements a 4 Wheel Differential Drive QR Code Following Bot with 
 
 ### Features Under Development
 * GPS waypoint navigation 
-* Replace QR Codes with AprilTags for more robust detection - use tag36h11(id=0) for following and tag36h11(id=x) for other purposes.
+* Replace QR Codes with AprilTags for more robust detection - use tag36h11(id=0) for following and tag36h11(id=x) for other purposes (Update - Detection works, working on following)
 
 ### Prerequisites: 
 * ROS2 Humble
