@@ -88,14 +88,21 @@ def generate_launch_description():
         executable="parameter_bridge",
         arguments=[
             "/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock",
-            "/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan",
-            "/scan/points@sensor_msgs/msg/PointCloud2@gz.msgs.PointCloudPacked",
             "/imu@sensor_msgs/msg/Imu@gz.msgs.IMU",
             "/camera/points@sensor_msgs/msg/PointCloud2@gz.msgs.PointCloudPacked",
             "/camera/camera_info@sensor_msgs/msg/CameraInfo@gz.msgs.CameraInfo",
-        ],
+            "/camera/depth_image@sensor_msgs/msg/Image@gz.msgs.Image",
+            "/camera/points@sensor_msgs/msg/PointCloud2@gz.msgs.PointCloudPacked",
+            '/scan' + '@sensor_msgs/msg/LaserScan' + '[' + 'ignition.msgs.LaserScan',
+            '/scan/points/points'  + '@sensor_msgs/msg/PointCloud2'   + '[' + 'ignition.msgs.PointCloudPacked',],
+        parameters= [{'qos_overrides./diff_drive_example.subscriber.reliability': 'reliable'}],
+        remappings= [
+                    ('/scan',     '/scan'   ),
+                    ('/scan/points/points', '/points'),
+                    ],
         output="screen"
     )
+
 
     ros_gz_image_bridge = Node(
         package="ros_gz_image",
