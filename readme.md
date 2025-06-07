@@ -42,9 +42,9 @@ This project implements a 4 Wheel Differential Drive Human Following robot with 
    ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r /cmd_vel:=/bot_controller/cmd_vel_unstamped
 
    ```
-6. Run Computer Vision Node (QR Code Detection) with LiDAR based obstacle avoidance
+6. Run Apriltag detection and Human Following
    ```sh
-   ros2 run bot_vision obstacle_avoidance
+   ros2 launch apriltag_navigation apriltag_navigation.launch.py
    ```
 7. SLAM with slam_toolbox
    ```sh
