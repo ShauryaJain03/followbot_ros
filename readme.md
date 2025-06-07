@@ -1,16 +1,14 @@
 ## Human Following Robot using ROS2
 
-This project implements a 4 Wheel Differential Drive QR Code Following Bot with LiDAR-based Obstacle Avoidance and Autonomous Return
+This project implements a 4 Wheel Differential Drive Human Following robot with Obstacle Avoidance and Autonomous Return
 
 ### Key Features:
 * ROS2 based software stack.
-* QR Code Following: Uses computer vision (YOLOv8) to detect and follow QR codes.
-* LiDAR-based Obstacle Avoidance: Avoids obstacles while following the QR code.
-* Mapless and Map based Autonomous Navigation - using nav2 and slam_toolbox
+* Human Following using Apriltags (tag36h11 with id=0 for following, use id=1 for other purposes)
+* Mapless and Map based Autonomous Navigation.
 
 ### Features Under Development
 * GPS waypoint navigation 
-* Replace QR Codes with AprilTags for more robust detection - use tag36h11(id=0) for following and tag36h11(id=x) for other purposes (Update - Detection works, working on following)
 
 ### Prerequisites: 
 * ROS2 Humble
@@ -44,9 +42,9 @@ This project implements a 4 Wheel Differential Drive QR Code Following Bot with 
    ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r /cmd_vel:=/bot_controller/cmd_vel_unstamped
 
    ```
-6. Run Computer Vision Node (QR Code Detection) with LiDAR based obstacle avoidance
+6. Run Apriltag detection and Human Following
    ```sh
-   ros2 run bot_vision obstacle_avoidance
+   ros2 launch apriltag_navigation apriltag_navigation.launch.py
    ```
 7. SLAM with slam_toolbox
    ```sh
