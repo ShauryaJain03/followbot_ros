@@ -61,7 +61,7 @@ This project implements a 4 Wheel Differential Drive Human Following robot with 
    ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r /cmd_vel:=/cmd_vel_joy
 
    ```
-10. Navigation Using ROS2
+10. Navigation Using Nav2
       ```sh
       ros2 launch bot_description navigation_launch.py use_sim_time:=true
       ```
