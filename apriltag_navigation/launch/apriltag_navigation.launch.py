@@ -10,12 +10,19 @@ def generate_launch_description():
             output='screen',
             parameters=[
                 {'image_transport': 'raw'},
-                {'tag_family': 'tf36h11'}  # Change to your tag family if needed
+                {'tag_family': 'tf36h11'}  
             ],
             remappings=[
-                ('image', '/camera/image_raw'),           # Change if your camera topic is different
-                ('camera_info', '/camera/camera_info'),   # Change if your camera info topic is different
+                ('image', '/camera/image_raw'),           
+                ('camera_info', '/camera/camera_info'),   
                 ('tags', '/apriltag_detections')
             ]
+        ),
+        Node(
+            package="apriltag_navigation",
+            executable="apriltag_navigation_node",
+            name="apriltag_logger",
+            output="screen"
         )
+
     ])
