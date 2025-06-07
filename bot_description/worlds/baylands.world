@@ -25,7 +25,7 @@
                 <linear>0.01</linear>
                 <quadratic>0.001</quadratic>
             </attenuation>
-            <direction>-0.5 0.1 -0.9</direction>
+            <direction>0.5 0 -0.1</direction>
         </light>
 
         <model name="ground_plane">
@@ -55,7 +55,6 @@
             </link>
         </model>
 
-        <!-- The room model -->
         <include>
             <uri>model://baylands</uri>
             <pose>-2.0 2 0 0 0 0</pose>
