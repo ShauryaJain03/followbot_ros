@@ -7,36 +7,80 @@ from std_msgs.msg import String
 
 class ImageSubscriber(Node):
     def __init__(self):
-        super().__init__('image_subscriber')
+        super().__init__('human_follower')
 
         self.detection_subscription = self.create_subscription(
             AprilTagDetectionArray,
             '/apriltag_detections',
-            self.detection_callback,
+            self.apriltag_callback,    
             10)
-        self.publisher = self.create_publisher(Twist, '/bot_controller/cmd_vel_unstamped', 10)
+        self.cmd_vel_pub = self.create_publisher(Twist, '/bot_controller/cmd_vel_unstamped', 10)
 
-    def detection_callback(self, msg: AprilTagDetectionArray):
+    
+        self.target_tag_id = 0
+        self.target_area = 22000  
+        self.max_speed = 1.0      
+        self.max_turn = 0.5       
+        
+        self.get_logger().info(f'Following tag ID: {self.target_tag_id}')
+        self.get_logger().info(f'Will stop when tag area > {self.target_area} pixels')
+        
+    def calculate_tag_area(self, corners):
+        if len(corners) != 4:
+            return 0
+            
+        x_coords = [corner.x for corner in corners]
+        y_coords = [corner.y for corner in corners]
+        
+        width = max(x_coords) - min(x_coords)
+        height = max(y_coords) - min(y_coords)
+        
+        return width * height
+    
+    def apriltag_callback(self, msg:AprilTagDetectionArray):
         if not msg.detections:
-            self.get_logger().info('No tag detections.')
+            self.get_logger().info("No Detection!")
+            self.stop_robot()
             return
-
+        
+        target_tag = None
         for detection in msg.detections:
-            self.get_logger().info(f"Tag ID: {detection.id}")
-            self.get_logger().info(f"Family: {detection.family}")
-            self.get_logger().info(f"Hamming: {detection.hamming}")
-            self.get_logger().info(f"Decision Margin: {detection.decision_margin}")
-            self.get_logger().info(f"Centre: ({detection.centre.x}, {detection.centre.y})")
-            '''self.get_logger().info("  Corners:")
-            for i, corner in enumerate(detection.corners):
-                self.get_logger().info(f"    Corner {i+1}: ({corner.x}, {corner.y})")'''
-            cmd_vel = Twist()
-            cmd_vel.linear.x = 1.0
-
-            if detection.id == 0:
-                self.publisher.publish(cmd_vel)
-                
-
+            if detection.id == self.target_tag_id:
+                target_tag = detection
+                break
+        
+        if target_tag is None:
+            self.stop_robot()
+            return
+        
+        area = self.calculate_tag_area(target_tag.corners)
+        self.get_logger().info(f'Tag area: {area:.0f} pixels')
+        
+        if area > self.target_area:
+            self.get_logger().info('Target reached! Stopping.')
+            self.stop_robot()
+            return
+        
+        twist = Twist()
+        
+        image_center = 320  
+        tag_x = target_tag.centre.x
+        
+        if abs(tag_x - image_center) > 50:  
+            if tag_x < image_center:
+                twist.angular.z = self.max_turn 
+            else:
+                twist.angular.z = -self.max_turn 
+        
+       
+        if abs(tag_x - image_center) < 100:
+            twist.linear.x = self.max_speed
+        
+        self.cmd_vel_pub.publish(twist)
+        
+    def stop_robot(self):
+        twist = Twist()
+        self.cmd_vel_pub.publish(twist)
 
 
 def main(args=None):
