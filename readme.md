@@ -6,9 +6,10 @@ This project implements a 4 Wheel Differential Drive Human Following robot with 
 * ROS2 based software stack.
 * Human Following using Apriltags (tag36h11 with id=0 for following, use id=1 for other purposes)
 * Mapless and Map based Autonomous Navigation.
+* GPS waypoint navigation 
 
 ### Features Under Development
-* GPS waypoint navigation 
+* Testing LIO SAM
 
 ### Prerequisites: 
 * ROS2 Humble
