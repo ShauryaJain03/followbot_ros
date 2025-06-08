@@ -42,9 +42,7 @@ class GPSWaypointFollower(Node):
         self.yaw = 0
 
         self.waypoints = [[47.478830, 19.058087],
-                         [47.478878, 19.058149],
-                         [47.479075, 19.058055],
-                         [47.478950, 19.057785]]
+                         [47.478878, 19.058149]]
         
         self.waypoint_index = 0
 
@@ -74,12 +72,6 @@ class GPSWaypointFollower(Node):
 
             distance, bearing = haversine(self.latitude, self.longitude, self.waypoints[self.waypoint_index][0], self.waypoints[self.waypoint_index][1])
 
-            # Calculate the heading error from robot's yaw angle and bearing from the GPS coordinates
-            # In ROS, the default convention for rotations around the z-axis follows the right-hand rule
-            # Consequently, rotating clockwise corresponds to a negative yaw change.
-            # In traditional navigation, bearing is measured clockwise from North (i.e., 0° = North, 90° = East, etc.).
-            # In that system, turning clockwise makes the bearing angle increase.
-            # Also robot faces to the east when it starts, so we need to add pi/2 offset to the yaw angle
             heading_error =  -1 * bearing - (self.yaw - math.pi/2)
                     
             if heading_error > math.pi:
@@ -89,9 +81,7 @@ class GPSWaypointFollower(Node):
         
             self.get_logger().info(f'Distance: {distance:.2f} m, heading error: {heading_error:.3f}')
 
-            # Heading error, threshold is 0.03 rad
             if abs(heading_error) > 0.03:
-                # Only rotate in place if there is any heading error
                 msg.linear.x = 0.0
 
                 if heading_error < 0:
@@ -99,9 +89,7 @@ class GPSWaypointFollower(Node):
                 else:
                     msg.angular.z = 0.3
             else:
-                # Only straight driving, no curves
                 msg.angular.z = 0.0
-                # Distance error, threshold is 0.3m
                 if distance > 0.3:
                     msg.linear.x = 0.5
                 else:
@@ -109,14 +97,13 @@ class GPSWaypointFollower(Node):
                     self.get_logger().info("Target waypoint reached!")
                     self.waypoint_index += 1
 
-            #self.get_logger().info(f'Publishing cmd_vel: linear.x={msg.linear.x}, angular.z={msg.angular.z}')
+            #self.get_logger(l).info(f'Publishing cmd_vel: linear.x={msg.linear.x}, angular.z={msg.angular.z}')
             self.publisher.publish(msg)
 
             if self.waypoint_index == len(self.waypoints):
                 self.get_logger().info("Last target waypoint reached!")
                 break
             else:
-                # Spin once to handle ROS 2 callbacks
                 rclpy.spin_once(self, timeout_sec=0.05)
         
 
@@ -125,7 +112,7 @@ def main(args=None):
     node = GPSWaypointFollower()
 
     try:
-        node.waypoint_follower()  # Follow waypoints
+        node.waypoint_follower() 
     except KeyboardInterrupt:
         pass
     finally:

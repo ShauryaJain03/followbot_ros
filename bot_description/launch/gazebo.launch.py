@@ -92,6 +92,7 @@ def generate_launch_description():
             "/camera/points@sensor_msgs/msg/PointCloud2@gz.msgs.PointCloudPacked",
             "/camera/camera_info@sensor_msgs/msg/CameraInfo@gz.msgs.CameraInfo",
             "/camera/depth_image@sensor_msgs/msg/Image@gz.msgs.Image",
+            "/navsat@sensor_msgs/msg/NavSatFix@gz.msgs.NavSat",
             "/camera/points@sensor_msgs/msg/PointCloud2@gz.msgs.PointCloudPacked",
             '/scan' + '@sensor_msgs/msg/LaserScan' + '[' + 'ignition.msgs.LaserScan',
             '/scan/points/points'  + '@sensor_msgs/msg/PointCloud2'   + '[' + 'ignition.msgs.PointCloudPacked',],
