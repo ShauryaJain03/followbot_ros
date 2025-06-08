@@ -1,6 +1,6 @@
 ## Human Following Robot using ROS2
 
-This project implements a 4 Wheel Differential Drive Human Following robot with Obstacle Avoidance and Autonomous Return
+Implementation of a 4 Wheel Differential Drive Human Following robot with Obstacle Avoidance and Autonomous Return
 
 ### Key Features:
 * ROS2 based software stack.
