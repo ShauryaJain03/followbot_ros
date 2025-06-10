@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import rclpy
-from rclpy.node import Node     # Import ROS2 Node as parent for our own node class
+from rclpy.node import Node     
 from sensor_msgs.msg import Imu
 from sensor_msgs.msg import NavSatFix
 from geometry_msgs.msg import Twist
