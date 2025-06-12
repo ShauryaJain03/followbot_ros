@@ -20,7 +20,7 @@ Implementation of a 4 Wheel Differential Drive Human Following robot with Obstac
 
 1. Visualize URDF in RViz (without launch file)
    ```sh
-   ros2 launch urdf_tutorial display.launch.py model:=/home/shaurya/armybot_diff/src/bot_description/urdf/bot.urdf.xacro
+   ros2 launch urdf_tutorial display.launch.py model:={urdf file path}
 
    ```
 2. Launch Gazebo Simulation in Custom World
@@ -72,7 +72,11 @@ Implementation of a 4 Wheel Differential Drive Human Following robot with Obstac
    
     ros2 launch bot_description navigation_launch.py use_sim_time:=true
     
-    ```   
+    ```
+12. Launch LIO SAM
+    ```sh
+    ros2 launch lio_sam run.launch.py
+    ```
 
 <!-- USAGE EXAMPLES -->
 ### Usage
