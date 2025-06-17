@@ -41,8 +41,7 @@ class GPSWaypointFollower(Node):
         self.pitch = 0
         self.yaw = 0
 
-        self.waypoints = [[47.478830, 19.058087],
-                         [47.478878, 19.058149]]
+        self.waypoints = [[47.478830, 19.058087]]
         
         self.waypoint_index = 0
 
