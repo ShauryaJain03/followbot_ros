@@ -84,13 +84,13 @@ class GPSWaypointFollower(Node):
                 msg.linear.x = 0.0
 
                 if heading_error < 0:
-                    msg.angular.z = -0.3
+                    msg.angular.z = -0.5
                 else:
-                    msg.angular.z = 0.3
+                    msg.angular.z = 0.5
             else:
                 msg.angular.z = 0.0
                 if distance > 0.3:
-                    msg.linear.x = 0.5
+                    msg.linear.x = 1.0
                 else:
                     msg.linear.x = 0.0
                     self.get_logger().info("Target waypoint reached!")
