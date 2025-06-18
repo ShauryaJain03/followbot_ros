@@ -227,7 +227,7 @@
   </joint>
 
     <!-- 2D LIDAR-->  
-<!--  <gazebo reference="laser_link">
+  <gazebo reference="laser_link">
     <sensor name="lidar" type="gpu_lidar">
       <always_on>true</always_on>
       <visualize>true</visualize>
@@ -255,8 +255,8 @@
         </noise>
       </lidar>
     </sensor>
-  </gazebo>--> 
-
+  </gazebo>
+<!-- 
   <gazebo reference="laser_link">
     <sensor type="gpu_lidar" name="generic_lidar_sensor">
         <update_rate>50</update_rate>
@@ -287,7 +287,6 @@
             </range>
         </lidar>
     </sensor>
-    <!-- 2d lidar -->
     <sensor type="gpu_lidar" name="generic_twold_lidar_sensor">
       <topic>/scan</topic>
       <frame_id>laser_link</frame_id>
@@ -317,7 +316,7 @@
       <visualize>true</visualize>
     </sensor>
   </gazebo>
-
+-->
 
   <joint name="navsat_joint" type="fixed">
     <origin xyz="0 0 0" rpy="0 0 0" />

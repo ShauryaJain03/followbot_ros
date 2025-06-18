@@ -42,6 +42,7 @@ class GPSWaypointFollower(Node):
         self.yaw = 0
 
         self.waypoints = [[47.478830, 19.058087]]
+        '''home position - 47.47894999999999, 19.057785 '''
         
         self.waypoint_index = 0
 

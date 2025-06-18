@@ -22,6 +22,7 @@ setup(
     entry_points={
         'console_scripts': [
             'gps_waypoint_follower = bot_gps.gps_waypoint_follower:main',
+            'gps_home = bot_gps.gps_home:main',
         ],
     },
 )
