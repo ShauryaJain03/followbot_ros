@@ -83,26 +83,32 @@ def generate_launch_description():
         ],
     )
 
+
     gz_ros2_bridge = Node(
         package="ros_gz_bridge",
         executable="parameter_bridge",
         arguments=[
-            "/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock",
-            "/imu@sensor_msgs/msg/Imu@gz.msgs.IMU",
-            "/camera/points@sensor_msgs/msg/PointCloud2@gz.msgs.PointCloudPacked",
-            "/camera/camera_info@sensor_msgs/msg/CameraInfo@gz.msgs.CameraInfo",
-            "/camera/depth_image@sensor_msgs/msg/Image@gz.msgs.Image",
-            "/navsat@sensor_msgs/msg/NavSatFix@gz.msgs.NavSat",
-            "/camera/points@sensor_msgs/msg/PointCloud2@gz.msgs.PointCloudPacked",
+            "/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock",            
+            "/imu@sensor_msgs/msg/Imu@gz.msgs.IMU",            
+            "/camera/camera_info@sensor_msgs/msg/CameraInfo@gz.msgs.CameraInfo",            
+            "/camera/depth_image@sensor_msgs/msg/Image@gz.msgs.Image",            
+            "/navsat@sensor_msgs/msg/NavSatFix@gz.msgs.NavSat",            
+            "/camera/points@sensor_msgs/msg/PointCloud2@gz.msgs.PointCloudPacked",            
+            "/drone_image@sensor_msgs/msg/Image@gz.msgs.Image",            
+            "/thermal_camera_8bit/image@sensor_msgs/msg/Image@gz.msgs.Image",
             '/scan' + '@sensor_msgs/msg/LaserScan' + '[' + 'ignition.msgs.LaserScan',
-            '/scan/points/points'  + '@sensor_msgs/msg/PointCloud2'   + '[' + 'ignition.msgs.PointCloudPacked',],
-        parameters= [{'qos_overrides./diff_drive_example.subscriber.reliability': 'reliable'}],
+            '/scan/points/points'  + '@sensor_msgs/msg/PointCloud2'   + '[' + 'ignition.msgs.PointCloudPacked',
+        ],
+        parameters=[
+            {'qos_overrides./diff_drive_example.subscriber.reliability': 'reliable'}
+        ],
         remappings= [
                     ('/scan',     '/scan'   ),
                     ('/scan/points/points', '/points'),
                     ],
         output="screen"
     )
+
 
 
     ros_gz_image_bridge = Node(

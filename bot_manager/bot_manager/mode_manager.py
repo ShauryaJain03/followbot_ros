@@ -60,6 +60,8 @@ class ModeManager(Node):
                 "ros2", "run", "bot_gps", "gps_home",
                 "--ros-args", "-p", f"latitude:={self.gps_lat}", "-p", f"longitude:={self.gps_lon}"
             ]
+        elif mode=="manual":
+            pass
         else:
             response.success = False
             response.message = f"Unknown mode: {mode}"

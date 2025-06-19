@@ -36,6 +36,51 @@
             <elevation>0</elevation>
             <heading_deg>0</heading_deg>
         </spherical_coordinates>
+
+    <model name='aerial_camera'>
+      <static>true</static>
+      <pose>0 0 50 0 1.5708 0</pose> <!-- 10m high, looking down -->
+      <link name='camera_link'>
+        <visual name='camera_visual'>
+          <geometry>
+            <box>
+              <size>0.1 0.1 0.05</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.2 0.2 0.2 1</ambient>
+            <diffuse>0.4 0.4 0.4 1</diffuse>
+            <specular>0.8 0.8 0.8 1</specular>
+          </material>
+        </visual>
+        
+        <sensor name='aerial_camera_sensor' type='camera'>
+          <pose>0 0 0 0 0 0</pose>
+          <camera>
+            <horizontal_fov>1.047</horizontal_fov> <!-- 60 degrees -->
+            <image>
+              <width>1920</width>
+              <height>1080</height>
+              <format>R8G8B8</format>
+            </image>
+            <clip>
+              <near>0.1</near>
+              <far>1000</far>
+            </clip>
+            <noise>
+              <type>gaussian</type>
+              <mean>0.0</mean>
+              <stddev>0.007</stddev>
+            </noise>
+          </camera>
+          <always_on>1</always_on>
+          <update_rate>30</update_rate>
+          <visualize>true</visualize>
+          <topic>/drone_image</topic>
+
+        </sensor>
+      </link>
+    </model>
         <model name="ground_plane">
             <static>true</static>
             <link name="link">
