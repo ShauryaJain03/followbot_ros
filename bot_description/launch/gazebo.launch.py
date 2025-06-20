@@ -79,7 +79,7 @@ def generate_launch_description():
         arguments=[
             "-topic", "robot_description",
             "-name", "bot",
-            "-z", "2.0"     
+            "-z", "5.0"     
         ],
     )
 
@@ -100,11 +100,11 @@ def generate_launch_description():
             '/scan/points/points'  + '@sensor_msgs/msg/PointCloud2'   + '[' + 'ignition.msgs.PointCloudPacked',
         ],
         parameters=[
-            {'qos_overrides./diff_drive_example.subscriber.reliability': 'reliable'}
+            {'qos_overrides./diff_drive_example.subscriber.reliability': 'reliable','use_sim_time': True}
         ],
         remappings= [
                     ('/scan',     '/scan'   ),
-                    ('/scan/points/points', '/points'),
+                    ('/scan/points/points', '/points_raw'),
                     ],
         output="screen"
     )
@@ -114,7 +114,14 @@ def generate_launch_description():
     ros_gz_image_bridge = Node(
         package="ros_gz_image",
         executable="image_bridge",
-        arguments=["/camera/image_raw"]
+        arguments=["/camera/image_raw"],
+        parameters=[{'use_sim_time': True}] 
+    )
+
+    lidar_time_node = Node(
+        package="bot_vision",
+        executable="lidar_time",
+        output='screen'
     )
 
     return LaunchDescription([
@@ -126,5 +133,6 @@ def generate_launch_description():
         world_name_arg,
         ros_gz_image_bridge,
         gz_ros2_bridge,
-        joint_state_pub
+        joint_state_pub,
+        #lidar_time_node
     ])

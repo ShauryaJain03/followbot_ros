@@ -1,0 +1,97 @@
+<?xml version='1.0'?>
+<sdf version='1.8'>
+  <world name='office_construction'>
+    <physics name="1ms" type="ignored">
+        <!--
+            The maximum step size the simulation can take.
+            Aiming for a minimum of 250 Hz
+        -->
+        <max_step_size>0.002</max_step_size>
+        <real_time_factor>1.0</real_time_factor>
+        <real_time_update_rate>500</real_time_update_rate>
+    </physics>
+    <plugin filename="ignition-gazebo-physics-system" name="ignition::gazebo::systems::Physics"></plugin>
+    <plugin filename="ignition-gazebo-user-commands-system" name="ignition::gazebo::systems::UserCommands"></plugin>
+    <plugin filename="ignition-gazebo-scene-broadcaster-system" name="ignition::gazebo::systems::SceneBroadcaster"></plugin>
+    <plugin filename="ignition-gazebo-contact-system" name="ignition::gazebo::systems::Contact"></plugin>
+    <scene>
+      <ambient>0.5 0.5 0.5 1</ambient>
+      <background>0.8 0.8 0.8 1</background>
+      <shadows>1</shadows>
+      <grid>true</grid>
+    </scene>
+
+    <light name='sun' type='directional'>
+      <cast_shadows>1</cast_shadows>
+      <pose>0 0 10 0 -0 0</pose>
+      <diffuse>1.0 1.0 1.0 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>-0.5 0.5 -1.0</direction>
+    </light>
+
+    <!-- Origin placed somewhere near Clearpath's office in Waterloo, ON, Canada -->
+    <spherical_coordinates>
+      <surface_model>EARTH_WGS84</surface_model>
+      <latitude_deg>43.500720</latitude_deg>
+      <longitude_deg>-80.546793</longitude_deg>
+      <elevation>329</elevation>
+      <heading_deg>0</heading_deg>
+    </spherical_coordinates>
+
+    <model name='office'>
+      <pose>0 0 0 0 0 0</pose>
+      <static>true</static>
+      <link name='office'>
+        <collision name='office_collision'>
+          <geometry>
+            <mesh>
+              <uri>
+                model://office/office_construction.dae
+              </uri>
+            </mesh>
+          </geometry>
+        </collision>
+        <visual name='office_visual'>
+          <geometry>
+            <mesh>
+              <uri>
+                model://office/office_construction.dae
+              </uri>
+            </mesh>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <model name='charge_dock'>
+      <pose>17 -2 0 0 0 2.356194490192345</pose>
+      <static>true</static>
+      <link name='charge_dock'>
+        <collision name='charge_dock_collision'>
+          <geometry>
+            <mesh>
+              <uri>
+                model://accessories/wibotic_tr301.stl
+              </uri>
+            </mesh>
+          </geometry>
+        </collision>
+        <visual name='charge_dock_visual'>
+          <geometry>
+            <mesh>
+              <uri>
+                model://accessories/wibotic_tr301.dae
+              </uri>
+            </mesh>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+  </world>
+</sdf>

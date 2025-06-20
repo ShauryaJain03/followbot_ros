@@ -20,8 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'vision_node = bot_vision.vision_node : main',
-            "obstacle_avoidance = bot_vision.obstacle_avoidance : main"
+            'drone_nav = bot_vision.drone_nav:main',
+            'lidar_time = bot_vision.lidar_time:main'
         ],
     },
 )
