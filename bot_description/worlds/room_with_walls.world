@@ -57,7 +57,7 @@
 
         <!-- The room model -->
         <include>
-            <uri>model://room_with_walls_1</uri>
+            <uri>models://room_with_walls_1</uri>
             <pose>-2.0 2 0 0 0 0</pose>
         </include>
     </world>

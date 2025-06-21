@@ -1,15 +1,11 @@
 <?xml version="1.0"?>
 <sdf version="1.8">
-    <world name="room_with_walls_1">
-        <physics name="1ms" type="ignored">
-            <!--
-                The maximum step size the simulation can take.
-                Aiming for a minimum of 250 Hz
-            -->
-            <max_step_size>0.002</max_step_size>
-            <real_time_factor>1.0</real_time_factor>
-            <real_time_update_rate>500</real_time_update_rate>
-        </physics>
+    <world name="baylands">
+    <physics name="default_physics" type="ode">
+      <max_step_size>0.01</max_step_size>
+      <real_time_update_rate>100</real_time_update_rate>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
         <plugin filename="ignition-gazebo-physics-system" name="ignition::gazebo::systems::Physics"></plugin>
         <plugin filename="ignition-gazebo-user-commands-system" name="ignition::gazebo::systems::UserCommands"></plugin>
         <plugin filename="ignition-gazebo-scene-broadcaster-system" name="ignition::gazebo::systems::SceneBroadcaster"></plugin>
@@ -25,7 +21,7 @@
                 <linear>0.01</linear>
                 <quadratic>0.001</quadratic>
             </attenuation>
-            <direction>0.5 0 -0.1</direction>
+            <direction>-0.5 0.5 -1.0</direction>
         </light>
               <!-- Set the coordinates for the world origin -->
         <spherical_coordinates>
