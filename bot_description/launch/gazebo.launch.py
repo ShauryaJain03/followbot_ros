@@ -79,7 +79,7 @@ def generate_launch_description():
         arguments=[
             "-topic", "robot_description",
             "-name", "bot",
-            "-z", "5.0"     
+            "-z", "4.0" 
         ],
     )
 
@@ -104,7 +104,7 @@ def generate_launch_description():
         ],
         remappings= [
                     ('/scan',     '/scan'   ),
-                    ('/scan/points/points', '/points_raw'),
+                    ('/scan/points/points', '/points'),
                     ],
         output="screen"
     )
