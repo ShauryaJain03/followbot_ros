@@ -351,14 +351,15 @@
     <material>Gazebo/GreyTransparent</material>
   </gazebo>
 
+
+  <link name="navsat_link">
+  </link>
+
   <joint name="navsat_joint" type="fixed">
     <origin xyz="0 0 0" rpy="0 0 0" />
     <parent link="base_link"/>
     <child link="navsat_link" />
   </joint>
-
-  <link name="navsat_link">
-  </link>
 
 
   <link name="imu_link">

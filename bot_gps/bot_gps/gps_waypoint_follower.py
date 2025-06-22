@@ -41,7 +41,9 @@ class GPSWaypointFollower(Node):
         self.pitch = 0
         self.yaw = 0
 
-        self.waypoints = [[47.478830, 19.058087]]
+        self.waypoints = [[47.478830, 19.058087],
+                         [47.478878, 19.058149],
+                         [47.479075, 19.058055]]
         '''home position - 47.47894999999999, 19.057785 '''
         
         self.waypoint_index = 0
@@ -85,13 +87,13 @@ class GPSWaypointFollower(Node):
                 msg.linear.x = 0.0
 
                 if heading_error < 0:
-                    msg.angular.z = -0.5
+                    msg.angular.z = -0.3
                 else:
-                    msg.angular.z = 0.5
+                    msg.angular.z = 0.3
             else:
                 msg.angular.z = 0.0
-                if distance > 0.3:
-                    msg.linear.x = 1.0
+                if distance > 1.0:
+                    msg.linear.x = 0.8
                 else:
                     msg.linear.x = 0.0
                     self.get_logger().info("Target waypoint reached!")

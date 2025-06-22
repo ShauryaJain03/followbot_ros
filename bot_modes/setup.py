@@ -22,7 +22,11 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            "follow_node = bot_modes.follow_node:main"
+            "follow_node = bot_modes.follow_node:main",
+            "return_node = bot_modes.return_node:main"
+            
         ],
     },
 )
+
+
