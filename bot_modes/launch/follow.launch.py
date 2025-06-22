@@ -18,11 +18,11 @@ def generate_launch_description():
                 ('tags', '/apriltag_detections')
             ]
         ),
-        #Node(
-         #   package="apriltag_navigation",
-          #  executable="apriltag_navigation_node",
-           # name="apriltag_logger",
-            #output="screen"
-        #)
+        Node(
+            package="bot_modes",
+            executable="follow_node",
+            name="follow_node",
+            output="screen"
+        )
 
     ])
