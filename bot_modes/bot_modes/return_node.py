@@ -159,7 +159,7 @@ class ReturnHomeLifecycle(LifecycleNode):
                 else:
                     msg.angular.z = 0.0
                     if distance > 1.0:
-                        msg.linear.x = 0.8
+                        msg.linear.x = 0.5
                     else:
                         msg.linear.x = 0.0
                         self.get_logger().info("Home Reached!")
