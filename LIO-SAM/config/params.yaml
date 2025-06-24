@@ -3,13 +3,13 @@
 
     # Topics
     pointCloudTopic: "/points"                   # Point cloud data
-    imuTopic: "/imu"                        # IMU data
+    imuTopic: "/imu_raw"                        # IMU data
     odomTopic: "/bot_controller/odom"                    # IMU pre-preintegration odometry, same frequency as IMU
     gpsTopic: "odometry/gpsz"                    # GPS odometry topic from navsat, see module_navsat.launch file
 
     # Frames
-    lidarFrame: "laser_link"
-    baselinkFrame: "base_link"
+    lidarFrame: "lidar_link"
+    baselinkFrame: "base_footprint"
     odometryFrame: "odom"
     mapFrame: "map"
 
@@ -21,7 +21,7 @@
 
     # Export settings
     savePCD: false                               # https://github.com/TixiaoShan/LIO-SAM/issues/3
-    savePCDDirectory: "/Downloads/LOAM/"         # in your home folder, starts and ends with "/". Warning: the code deletes "LOAM" folder then recreates it. See "mapOptimization" for implementation
+    savePCDDirectory: "/home/shaurya/armybot_diff/"         # in your home folder, starts and ends with "/". Warning: the code deletes "LOAM" folder then recreates it. See "mapOptimization" for implementation
 
     # Sensor Settings
     sensor: velodyne                               # lidar sensor type, either 'velodyne', 'ouster' or 'livox'

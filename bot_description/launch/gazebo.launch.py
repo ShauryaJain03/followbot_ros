@@ -105,6 +105,7 @@ def generate_launch_description():
         remappings= [
                     ('/scan',     '/scan'   ),
                     ('/scan/points/points', '/points'),
+                    ('/imu','/imu_raw')
                     ],
         output="screen"
     )
