@@ -38,7 +38,7 @@ class ReturnHomeLifecycle(LifecycleNode):
         # Create publishers and subscriptions in configure state
         self.publisher = self.create_publisher(Twist, '/bot_controller/cmd_vel_unstamped', 10)
         self.gps_subscription = self.create_subscription(NavSatFix, '/navsat', self.navsat_callback, 10)
-        self.imu_subscription = self.create_subscription(Imu, '/imu', self.imu_callback, 10)
+        self.imu_subscription = self.create_subscription(Imu, '/imu_raw', self.imu_callback, 10)
         
         return TransitionCallbackReturn.SUCCESS
 
@@ -151,21 +151,20 @@ class ReturnHomeLifecycle(LifecycleNode):
 
                 if abs(heading_error) > 0.03:
                     msg.linear.x = 0.0
+
                     if heading_error < 0:
                         msg.angular.z = -0.3
                     else:
                         msg.angular.z = 0.3
-
                 else:
                     msg.angular.z = 0.0
                     if distance > 1.0:
                         msg.linear.x = 0.5
                     else:
                         msg.linear.x = 0.0
-                        self.get_logger().info("Home Reached!")
+                        self.get_logger().info("Target waypoint reached!")
                         self.waypoint_index += 1
 
-                # Only publish if we're still active and have a publisher
                 if self.publisher and self.following_waypoints:
                     self.publisher.publish(msg)
 
@@ -225,3 +224,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+

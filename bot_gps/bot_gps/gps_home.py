@@ -34,7 +34,7 @@ class DynamicGPSFollower(Node):
         self.longitude = self.get_parameter('longitude').value
         self.publisher = self.create_publisher(Twist, '/bot_controller/cmd_vel_unstamped', 10)
         self.gps_sub = self.create_subscription(NavSatFix, '/navsat', self.gps_callback, 10)
-        self.imu_sub = self.create_subscription(Imu, '/imu', self.imu_callback, 10)
+        self.imu_sub = self.create_subscription(Imu, '/imu_raw', self.imu_callback, 10)
         self.srv = self.create_service(GPSHome, 'send_gps_home', self.goal_callback)
 
         self.yaw = None
@@ -83,12 +83,12 @@ class DynamicGPSFollower(Node):
 
             if abs(heading_error) > 0.03:
                 msg.linear.x = 0.0
-                msg.angular.z = 0.5 * (1 if heading_error > 0 else -1)
+                msg.angular.z = 0.3 * (1 if heading_error > 0 else -1)
             else:
                 msg.angular.z = 0.0
-                msg.linear.x = 1.0 if distance > 0.3 else 0.0
+                msg.linear.x = 0.8 if distance > 1.0 else 0.0
 
-            if distance < 0.3:
+            if distance < 1.0:
                 self.get_logger().info("Reached Home Position.")
                 msg.linear.x = 0.0
                 msg.angular.z = 0.0

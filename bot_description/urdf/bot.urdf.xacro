@@ -248,7 +248,7 @@
   </gazebo>
 
 
-  <link name="lidar_link">
+  <link name="laser_link">
     <inertial>
       <mass value="0.3" />
       <inertia ixx="0.008" ixy="0.0" ixz="0" 
@@ -271,21 +271,21 @@
     </collision>
   </link>
 
-  <joint name="lidar_joint" type="continuous">
+  <joint name="laser_joint" type="continuous">
     <origin xyz="0 0 0.3" rpy="0 0.0 0"/>
     <parent link="base_link"/>
-    <child link="lidar_link"/>
+    <child link="laser_link"/>
     <axis xyz="0.0 0.0 1.0"/>
     <dynamics damping="0.1" friction="0.1"/>
   </joint>
 
-  <gazebo reference="lidar_link">
+  <gazebo reference="laser_link">
     <sensor type="gpu_lidar" name="generic_lidar_sensor">
       <update_rate>50</update_rate>
       <visualize>true</visualize>
       <always_on>true</always_on>
-      <frame_id>lidar_link</frame_id>
-      <ignition_frame_id>lidar_link</ignition_frame_id>
+      <frame_id>laser_link</frame_id>
+      <ignition_frame_id>laser_link</ignition_frame_id>
       <topic>/scan/points</topic>
       <lidar>
         <scan>
@@ -311,8 +311,8 @@
     </sensor>
     <sensor type="gpu_lidar" name="generic_twold_lidar_sensor">
       <topic>/scan</topic>
-      <frame_id>lidar_link</frame_id>
-      <ignition_frame_id>lidar_link</ignition_frame_id>
+      <frame_id>laser_link</frame_id>
+      <ignition_frame_id>laser_link</ignition_frame_id>
       <update_rate>50.0</update_rate>
       <ray>
         <scan>
@@ -339,9 +339,18 @@
     </sensor>
   </gazebo>
 
-  <gazebo reference="lidar_link">
+  <gazebo reference="lidar_base">
+    <material>Gazebo/DarkGrey</material>
+  </gazebo>
+
+  <gazebo reference="laser_link">
     <material>Gazebo/Black</material>
   </gazebo>
+
+  <gazebo reference="lidar_dome">
+    <material>Gazebo/GreyTransparent</material>
+  </gazebo>
+
 
   <link name="navsat_link">
   </link>

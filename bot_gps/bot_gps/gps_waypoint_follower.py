@@ -8,15 +8,12 @@ from tf_transformations import euler_from_quaternion
 import math
 
 def haversine(lat1_deg, lon1_deg, lat2_deg, lon2_deg):
-    # 0. Radius of earth in km
     R = 6378.137
-    # 1. Convert from degrees to radians
     lat1 = math.radians(lat1_deg)
     lon1 = math.radians(lon1_deg)
     lat2 = math.radians(lat2_deg)
     lon2 = math.radians(lon2_deg)
 
-    # 2. Haversine formula for distance
     dlat = lat2 - lat1
     dlon = lon2 - lon1
 
@@ -24,7 +21,6 @@ def haversine(lat1_deg, lon1_deg, lat2_deg, lon2_deg):
     c = 2 * math.asin(math.sqrt(a))
     distance_m = R * c * 1000
 
-    # 3. Initial bearing calculation (forward azimuth)
     y = math.sin(dlon) * math.cos(lat2)
     x = math.cos(lat1) * math.sin(lat2) - math.sin(lat1) * math.cos(lat2) * math.cos(dlon)
     bearing_rad = math.atan2(y, x)  # range -π to +π
@@ -41,16 +37,14 @@ class GPSWaypointFollower(Node):
         self.pitch = 0
         self.yaw = 0
 
-        self.waypoints = [[47.478830, 19.058087],
-                         [47.478878, 19.058149],
-                         [47.479075, 19.058055]]
+        self.waypoints = [[47.478830, 19.058087]]
         '''home position - 47.47894999999999, 19.057785 '''
         
         self.waypoint_index = 0
 
         self.publisher = self.create_publisher(Twist, '/bot_controller/cmd_vel_unstamped', 10)
         self.gps_subscription = self.create_subscription(NavSatFix, '/navsat', self.navsat_callback, 10)
-        self.imu_subscription = self.create_subscription(Imu, '/imu', self.imu_callback, 10)
+        self.imu_subscription = self.create_subscription(Imu, '/imu_raw', self.imu_callback, 10)
 
     def navsat_callback(self, msg):
         self.latitude = msg.latitude
@@ -93,13 +87,12 @@ class GPSWaypointFollower(Node):
             else:
                 msg.angular.z = 0.0
                 if distance > 1.0:
-                    msg.linear.x = 0.5
+                    msg.linear.x = 0.8
                 else:
                     msg.linear.x = 0.0
                     self.get_logger().info("Target waypoint reached!")
                     self.waypoint_index += 1
 
-            #self.get_logger(l).info(f'Publishing cmd_vel: linear.x={msg.linear.x}, angular.z={msg.angular.z}')
             self.publisher.publish(msg)
 
             if self.waypoint_index == len(self.waypoints):
