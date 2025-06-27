@@ -41,7 +41,7 @@
     imuGravity: 9.80511
     imuRPYWeight: 0.01
 
-    extrinsicTrans:  [ 0.0,  0.0,  0.3]          # position of LIDAR in the frame of base_link (where IMU is attached)
+    extrinsicTrans:  [ 0.0,  0.0,  0.8]          # position of LIDAR in the frame of base_link (where IMU is attached)
     extrinsicRot:    [ 1.0,  0.0,  0.0,          # rotation matrix that represents linear acc measured by IMU expressed in lidar_frame
                        0.0, 1.0,  0.0,
                        0.0,  0.0, 1.0 ]

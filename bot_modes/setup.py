@@ -23,8 +23,8 @@ setup(
     entry_points={
         'console_scripts': [
             "follow_node = bot_modes.follow_node:main",
-            "return_node = bot_modes.return_node:main"
-            
+            "return_node = bot_modes.return_node:main",
+            "gps_waypoint_node = bot_modes.gps_waypoint_node:main"
         ],
     },
 )

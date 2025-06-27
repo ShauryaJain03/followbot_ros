@@ -119,11 +119,30 @@ def generate_launch_description():
         parameters=[{'use_sim_time': True}] 
     )
 
-    lidar_time_node = Node(
-        package="bot_vision",
-        executable="lidar_time",
-        output='screen'
+
+    joint_state_broadcaster_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "joint_state_broadcaster",
+            "--controller-manager",
+            "/controller_manager",
+        ],
+        parameters=[{'use_sim_time': True}]
     )
+
+
+    wheel_controller_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["bot_controller", 
+                   "--controller-manager", 
+                   "/controller_manager"
+        ],
+        parameters=[{'use_sim_time': True}]
+    )
+
+
 
     return LaunchDescription([
         model_arg,
@@ -135,5 +154,6 @@ def generate_launch_description():
         ros_gz_image_bridge,
         gz_ros2_bridge,
         joint_state_pub,
-        #lidar_time_node
+        #joint_state_broadcaster_spawner,
+        #wheel_controller_spawner,
     ])

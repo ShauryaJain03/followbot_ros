@@ -149,7 +149,7 @@ class ReturnHomeLifecycle(LifecycleNode):
             
                 self.get_logger().info(f'Distance: {distance:.2f} m, heading error: {heading_error:.3f}')
 
-                if abs(heading_error) > 0.03:
+                if abs(heading_error) > 0.05:
                     msg.linear.x = 0.0
 
                     if heading_error < 0:
@@ -158,7 +158,7 @@ class ReturnHomeLifecycle(LifecycleNode):
                         msg.angular.z = 0.3
                 else:
                     msg.angular.z = 0.0
-                    if distance > 1.0:
+                    if distance > 1.5:
                         msg.linear.x = 0.5
                     else:
                         msg.linear.x = 0.0
