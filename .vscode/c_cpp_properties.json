@@ -1,0 +1,35 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/shaurya/armybot_diff/install/pcd2pgm/include/**",
+        "/home/shaurya/armybot_diff/install/lio_sam/include/**",
+        "/home/shaurya/armybot_diff/install/bot_msgs/include/**",
+        "/home/shaurya/armybot_diff/install/bot_localization/include/**",
+        "/home/shaurya/turtlebot3_ws/install/turtlebot3_fake_node/include/**",
+        "/home/shaurya/turtlebot3_ws/install/turtlebot3_msgs/include/**",
+        "/home/shaurya/turtlebot3_ws/install/turtlebot3_gazebo/include/**",
+        "/home/shaurya/turtlebot3_ws/install/dynamixel_sdk_custom_interfaces/include/**",
+        "/home/shaurya/turtlebot3_ws/install/dynamixel_sdk/include/**",
+        "/opt/ros/humble/include/**",
+        "/home/shaurya/armybot_diff/src/LIO-SAM/include/**",
+        "/home/shaurya/armybot_diff/src/bot_controller/include/**",
+        "/home/shaurya/armybot_diff/src/bot_description/include/**",
+        "/home/shaurya/armybot_diff/src/bot_localization/include/**",
+        "/home/shaurya/armybot_diff/src/bot_msgs/include/**",
+        "/home/shaurya/armybot_diff/src/pcd2pgm/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}
