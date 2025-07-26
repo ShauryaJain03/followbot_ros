@@ -82,9 +82,10 @@ Implementation of a 4 Wheel Differential Drive Human Following robot with Obstac
     ```
 
 <!-- USAGE EXAMPLES -->
-### Usage
+### Demo
+[![LIO SAM Implementation]()](https://www.youtube.com/watch?v=03kYAswBATE)
+[![Apriltag based following and autonomous return using GPS]()](https://www.youtube.com/watch?v=XTHApWPIjQc)
 
-Images,videos being updated
 
 <!-- Contributing -->
 ### Contributing
