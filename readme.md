@@ -1,6 +1,6 @@
 ## Human Following and Payload Delivery Robot for Unstructured and Rough Environments
 
-Implementation of a 4 Wheel Differential Drive Human Following robot capable of carrying a load with ability autonomously return to starting point with terrain-aware navigation in both GPS enabled and GPS Denied environments
+Implementation of a 4 Wheel Differential Drive Human Following robot capable of carrying a load with the ability to autonomously return to starting point with terrain-aware navigation in both GPS enabled and GPS Denied environments
 
 ### Key Features:
 * ROS2 based software stack.
