@@ -21,7 +21,8 @@ setup(
     entry_points={
         'console_scripts': [
             'drone_nav = bot_vision.drone_nav:main',
-            'lidar_time = bot_vision.lidar_time:main'
+            'basic_detection = bot_vision.basic_detection:main',
+            'inter_detection = bot_vision.inter_detection:main',
         ],
     },
 )

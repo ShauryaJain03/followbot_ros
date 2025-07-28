@@ -38,13 +38,10 @@ def generate_launch_description():
         )
     )
 
-    ekf_node = IncludeLaunchDescription(
-        os.path.join(get_package_share_directory("bot_localization"),'launch','bot_localization.launch.py')
-    )
+
 
     return LaunchDescription([
         world_name_arg,
         gazebo,
         controller,
-        #ekf_node
     ])

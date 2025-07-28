@@ -120,28 +120,6 @@ def generate_launch_description():
     )
 
 
-    joint_state_broadcaster_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=[
-            "joint_state_broadcaster",
-            "--controller-manager",
-            "/controller_manager",
-        ],
-        parameters=[{'use_sim_time': True}]
-    )
-
-
-    wheel_controller_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["bot_controller", 
-                   "--controller-manager", 
-                   "/controller_manager"
-        ],
-        parameters=[{'use_sim_time': True}]
-    )
-
 
 
     return LaunchDescription([
@@ -154,6 +132,5 @@ def generate_launch_description():
         ros_gz_image_bridge,
         gz_ros2_bridge,
         joint_state_pub,
-        #joint_state_broadcaster_spawner,
-        #wheel_controller_spawner,
+
     ])
