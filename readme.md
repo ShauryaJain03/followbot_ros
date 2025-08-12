@@ -81,10 +81,11 @@ Implementation of a 4 Wheel Differential Drive Human Following robot capable of 
     ros2 launch lio_sam run.launch.py
     ```
 
-<!-- USAGE EXAMPLES -->
+
 ### Demo
-[![LIO SAM Implementation]()](https://www.youtube.com/watch?v=03kYAswBATE)
-[![Apriltag based following and autonomous return using GPS]()](https://www.youtube.com/watch?v=XTHApWPIjQc)
+[![LIO SAM Implementation](https://github.com/user-attachments/assets/3d78732c-3963-4808-b002-726828a6adb9)](https://www.youtube.com/watch?v=03kYAswBATE)
+<br></br>
+[![Apriltag based following and autonomous return using GPS](https://github.com/user-attachments/assets/813798aa-223b-416c-85cf-4c03ae31cf44)](https://www.youtube.com/watch?v=XTHApWPIjQc)
 
 
 <!-- Contributing -->
