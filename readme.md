@@ -87,12 +87,6 @@ Implementation of a 4 Wheel Differential Drive Human Following robot capable of 
 <br></br>
 [![Apriltag based following and autonomous return using GPS](https://github.com/user-attachments/assets/813798aa-223b-416c-85cf-4c03ae31cf44)](https://www.youtube.com/watch?v=XTHApWPIjQc)
 
-
-<!-- Contributing -->
-### Contributing
-
-This repository is not open to contributions.
-
 <!-- CONTACT -->
 ### Contact
 
