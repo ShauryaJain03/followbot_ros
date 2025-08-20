@@ -1,5 +1,6 @@
 from setuptools import find_packages, setup
-
+import glob as glob
+import os
 package_name = 'bot_hri'
 
 setup(
@@ -10,6 +11,8 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        ('share/' + package_name + '/launch', ['launch/rule_engine.launch.py']), 
+
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -21,7 +24,8 @@ setup(
     entry_points={
         'console_scripts': [
             "sensor_conf = bot_hri.sensor_conf:main",
-            "apriltag_conf = bot_hri.apriltag_conf:main"
+            "apriltag_conf = bot_hri.apriltag_conf:main",
+            "rule_engine = bot_hri.rule_engine:main",
         ],
     },
 )

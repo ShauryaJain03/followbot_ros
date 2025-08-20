@@ -7,6 +7,7 @@ class ApriltagConf(Node):
     def __init__(self):
         super().__init__("apriltag_confidence")
         self.subscriber = self.create_subscription(AprilTagDetectionArray,"/apriltag_detections",self.detection_callback,10)
+        
     def apriltag_confidence(self,hamming, decision_margin):
         hamming_conf = max(0.0, 1.0 - hamming * 0.3)
         dm_conf = min(decision_margin / 100.0, 1.0)

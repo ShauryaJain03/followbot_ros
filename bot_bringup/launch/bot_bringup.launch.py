@@ -38,6 +38,16 @@ def generate_launch_description():
         )
     )
 
+    rule_engine = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(
+                get_package_share_directory("bot_hri"),
+                'launch',
+                'rule_engine.launch.py'
+            )
+        )
+    )
+
 
 
     return LaunchDescription([
