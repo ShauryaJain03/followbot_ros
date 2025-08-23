@@ -28,7 +28,7 @@ Implementation of a 4 Wheel Differential Drive Human Following robot capable of 
    ```
 2. Launch Gazebo Simulation in Custom World
    ```sh
-   ros2 launch bot_description gazebo.launch.py world_name:={baylands/test_new/small_house/small_warehouse/empty/room_with_walls}
+   ros2 launch bot_description gazebo.launch.py world_name:={world name}
 
    ```
 3. Launch robot controller 
@@ -36,9 +36,9 @@ Implementation of a 4 Wheel Differential Drive Human Following robot capable of 
    ros2 launch bot_controller controller.launch.py
    
    ```
-4. Launch Gazebo Simulation in GPS Enabled World
+4. Launch Gazebo Simulation and Load controller
    ```sh
-   ros2 launch bot_description gps.launch.py world_name=empty
+   ros2 launch bot_bringup bot_bringup.launch.py
    
    ```
 5. Launch Keyboard Teleop with ros2_control
@@ -52,15 +52,15 @@ Implementation of a 4 Wheel Differential Drive Human Following robot capable of 
    ```
 7. SLAM with slam_toolbox
    ```sh
-   ros2 launch slam_toolbox online_async_launch.py slam_params_file:=./src/bot_description/config/mapper_params_online_async.yaml use_sim_time:=true
+   ros2 launch slam_toolbox online_async_launch.py slam_params_file:={path to yaml file} use_sim_time:=true
    ```
 8. Switch from Mapping to Localization - make change in the params file
    ```sh
-   ros2 launch slam_toolbox online_async_launch.py slam_params_file:=./src/bot_description/config/mapper_params_online_async.yaml use_sim_time:=true
+   ros2 launch slam_toolbox online_async_launch.py slam_params_file:={path to yaml file} use_sim_time:=true
    ```
 9. Control the Robot with Twist Mux
    ```sh
-   ros2 run twist_mux twist_mux --ros-args --params-file ./src/bot_description/config/twist_mux.yaml -r cmd_vel_out:=bot_controller/cmd_vel_unstamped
+   ros2 run twist_mux twist_mux --ros-args --params-file {path to yaml file} -r cmd_vel_out:=bot_controller/cmd_vel_unstamped
 
    ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r /cmd_vel:=/cmd_vel_joy
 
@@ -83,16 +83,23 @@ Implementation of a 4 Wheel Differential Drive Human Following robot capable of 
 
 
 ### Demo
-[![LIO SAM Implementation](https://github.com/user-attachments/assets/3d78732c-3963-4808-b002-726828a6adb9)](https://www.youtube.com/watch?v=03kYAswBATE)
+[![LIO SAM Implementation](https://github.com/user-attachments/assets/3d78732c-3963-4808-b002-726828a6adb9)](https://www.youtube.com/watch?v=XTHApWPIjQc)
 <br></br>
-[![Apriltag based following and autonomous return using GPS](https://github.com/user-attachments/assets/813798aa-223b-416c-85cf-4c03ae31cf44)](https://www.youtube.com/watch?v=XTHApWPIjQc)
+[![Apriltag based following and autonomous return using GPS](https://github.com/user-attachments/assets/813798aa-223b-416c-85cf-4c03ae31cf44)](https://www.youtube.com/watch?v=03kYAswBATE)
 
 <!-- CONTACT -->
 ### Contact
 
 Shaurya Jain - Reach me at jainshaurya.sj@gmail.com
 
-<!-- ACKNOWLEDGMENTS -->
-### Acknowledgments
 
-Centre of Intelligent Robotics IIITA, Dr. Surya Prakash, Mr. Rohit Kumar
+### Citation
+
+```bibtex
+@misc{terrain_aware_assistance_bot,
+  title        = {Terrain Aware Payload Delivery Robot},
+  author       = {Shaurya Jain},
+  year         = {2025},
+  url          = {https://github.com/ShauryaJain03/armybot_diff_drive},
+}
+
