@@ -13,6 +13,7 @@ class FollowCondition(py_trees.behaviour.Behaviour):
 
     def update(self):
         if self.robot_node.robot_mode == "follow":
+            self.robot_node.get_logger().info("[FollowCondition] SUCCESS - Following human mode enabled")
             return py_trees.common.Status.SUCCESS
         return py_trees.common.Status.FAILURE
 
@@ -24,6 +25,7 @@ class ReturnCondition(py_trees.behaviour.Behaviour):
 
     def update(self):
         if self.robot_node.robot_mode == "return":
+            self.robot_node.get_logger().info("[ReturnCondition] SUCCESS - return mode enabled")
             return py_trees.common.Status.SUCCESS
         return py_trees.common.Status.FAILURE
 
@@ -64,6 +66,7 @@ class ReturnAction(py_trees.behaviour.Behaviour):
         if self.robot_node.latitude is None or self.robot_node.longitude is None:
             return py_trees.common.Status.RUNNING
 
+        self.robot_node.get_logger().info("[ReturnAction] returning back to base")
         self.navigator.update_pose(self.robot_node.latitude, self.robot_node.longitude, self.robot_node.yaw)
         return self.navigator.navigate()
 
@@ -78,7 +81,6 @@ class BatteryLowCondition(py_trees.behaviour.Behaviour):
         self.threshold = threshold
         self.battery_level = 100.0
 
-        # ROS2 subscription to battery topic
         self.sub = self.robot_node.create_subscription(
             Float32,
             "/bot/battery_status",
@@ -91,5 +93,7 @@ class BatteryLowCondition(py_trees.behaviour.Behaviour):
 
     def update(self):
         if self.battery_level <= self.threshold:
+            self.robot_node.get_logger().warn(f"[BatteryLowCondition] Battery low! ({self.battery_level}%)")
             return py_trees.common.Status.SUCCESS
+        self.robot_node.get_logger().info(f"[BatteryLowCondition] Battery OK ({self.battery_level}%)")
         return py_trees.common.Status.FAILURE
