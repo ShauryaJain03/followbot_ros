@@ -15,7 +15,7 @@ class ModePublisher(Node):
     def timer_callback(self):
         elapsed = time.time() - self.start_time
         msg = String()
-        if(elapsed<30.0):           
+        if(elapsed<120.0):           
             msg.data = "follow"
             self.pub.publish(msg)
         else:

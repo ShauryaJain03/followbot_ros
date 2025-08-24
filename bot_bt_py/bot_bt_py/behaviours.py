@@ -3,6 +3,7 @@ import py_trees
 from apriltag_msgs.msg import AprilTagDetectionArray
 from .apriltag_follower import AprilTagFollower
 from .gps_navigator import GPSNavigator
+from std_msgs.msg import Float32
 
 
 class FollowCondition(py_trees.behaviour.Behaviour):
@@ -68,3 +69,27 @@ class ReturnAction(py_trees.behaviour.Behaviour):
 
     def terminate(self, new_status):
         self.navigator.stop()
+
+
+class BatteryLowCondition(py_trees.behaviour.Behaviour):
+    def __init__(self, robot_node, threshold=80.0):
+        super().__init__("Battery Low?")
+        self.robot_node = robot_node
+        self.threshold = threshold
+        self.battery_level = 100.0
+
+        # ROS2 subscription to battery topic
+        self.sub = self.robot_node.create_subscription(
+            Float32,
+            "/bot/battery_status",
+            self.battery_callback,
+            10
+        )
+
+    def battery_callback(self, msg):
+        self.battery_level = msg.data
+
+    def update(self):
+        if self.battery_level <= self.threshold:
+            return py_trees.common.Status.SUCCESS
+        return py_trees.common.Status.FAILURE

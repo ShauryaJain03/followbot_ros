@@ -6,7 +6,7 @@ import time
 class BatteryPub(Node):
     def __init__(self):
         super().__init__("battery_publisher")
-        self.pub = self.create_publisher(Float32, "/bot/battery", 10)
+        self.pub = self.create_publisher(Float32, "/bot/battery_status", 10)
         self.start_time = time.time()
         self.battery = 100.0 
         self.timer = self.create_timer(1.0, self.timer_callback)

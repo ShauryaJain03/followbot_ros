@@ -48,8 +48,14 @@ def generate_launch_description():
         )
     )
 
-    battery = Node(
+    battery_pub = Node(
         executable="mock_battery",
+        package="bot_bringup",
+        output="screen"
+    )
+
+    battery_sub = Node(
+        executable="battery_sub",
         package="bot_bringup",
         output="screen"
     )
@@ -60,5 +66,6 @@ def generate_launch_description():
         world_name_arg,
         gazebo,
         controller,
-        battery
+        battery_pub,
+        battery_sub
     ])

@@ -6,7 +6,7 @@ from std_msgs.msg import String
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Imu, NavSatFix
 from tf_transformations import euler_from_quaternion
-from .behaviours import FollowCondition, ReturnCondition, FollowAction, ReturnAction
+from .behaviours import FollowCondition, ReturnCondition, FollowAction, ReturnAction, BatteryLowCondition
 
 
 class RobotBTNode(Node):
@@ -17,7 +17,7 @@ class RobotBTNode(Node):
 
         self.robot_mode = "idle"
         self.create_subscription(String, "/bot/mode", self.mode_callback, 10)
-
+        
         self.latitude = None
         self.longitude = None
         self.yaw = 0.0
@@ -45,19 +45,22 @@ class RobotBTNode(Node):
     def create_behavior_tree(self):
         root = py_trees.composites.Selector(name="Main Behavior", memory=False)
 
+        battery_low = py_trees.composites.Sequence(name="Battery Failsafe", memory=False)
+        battery_condition = BatteryLowCondition(self, threshold=80.0)
+        battery_action = ReturnAction(self) 
+        battery_low.add_children([battery_condition, battery_action])
+
         follow_human = py_trees.composites.Sequence(name="Follow Human", memory=False)
         return_home = py_trees.composites.Sequence(name="Return Home", memory=False)
-
         follow_condition = FollowCondition(self)
         follow_action = FollowAction(self)
 
         return_condition = ReturnCondition(self)
         return_action = ReturnAction(self)
-
         follow_human.add_children([follow_condition, follow_action])
         return_home.add_children([return_condition, return_action])
 
-        root.add_children([follow_human, return_home])
+        root.add_children([battery_low,follow_human, return_home])
         return root
 
     def tick_tree(self):
