@@ -110,7 +110,7 @@ class ImageSubscriber(Node):
         current_time = time.time()
         
         if not msg.detections:
-            if current_time - self.last_detection_time > self.max_no_detection_time:
+            if (current_time - self.last_detection_time > self.max_no_detection_time):
                 self.get_logger().info("No detection for too long! Stopping.")
                 self.stop_robot()
             return
