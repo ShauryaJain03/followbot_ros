@@ -21,7 +21,8 @@ setup(
     entry_points={
         'console_scripts': [
             "bot_bt_node=bot_bt_py.bot_bt_node:main",
-            "mode_pub=bot_bt_py.mode_pub:main"        
+            "mode_pub=bot_bt_py.mode_pub:main",
+            "log_publisher=bot_bt_py.log_publisher:main"        
         ],
     },
 )

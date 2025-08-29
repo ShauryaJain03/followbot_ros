@@ -26,7 +26,6 @@ setup(
             "sensor_conf = bot_hri.sensor_conf:main",
             "apriltag_conf = bot_hri.apriltag_conf:main",
             "rule_engine = bot_hri.rule_engine:main",
-            "bt = bot_hri.bt:main",
         ],
     },
 )
