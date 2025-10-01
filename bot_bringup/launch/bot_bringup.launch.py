@@ -54,11 +54,7 @@ def generate_launch_description():
         output="screen"
     )
 
-    battery_sub = Node(
-        executable="battery_sub",
-        package="bot_bringup",
-        output="screen"
-    )
+    
 
 
 
@@ -67,5 +63,4 @@ def generate_launch_description():
         gazebo,
         controller,
         battery_pub,
-        battery_sub
     ])
