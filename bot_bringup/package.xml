@@ -7,6 +7,13 @@
   <maintainer email="jainshaurya.sj@gmail.com">shaurya</maintainer>
   <license>TODO: License declaration</license>
 
+  <exec_depend>bot_controller</exec_depend>
+  <exec_depend>bot_description</exec_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>ros2launch</exec_depend>
+
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
   <test_depend>ament_pep257</test_depend>

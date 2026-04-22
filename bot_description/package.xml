@@ -16,6 +16,7 @@
   <exec_depend>xacro</exec_depend>
   <exec_depend>ros_gz_sim</exec_depend>
   <exec_depend>ign_ros2_control</exec_depend>
+  <exec_depend>gazebo_ros_actor_plugin</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

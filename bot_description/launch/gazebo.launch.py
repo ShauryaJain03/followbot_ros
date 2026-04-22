@@ -5,7 +5,7 @@ from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, SetEnvironmentVariable
-from launch.substitutions import Command, LaunchConfiguration,PathJoinSubstitution, PythonExpression
+from launch.substitutions import Command, LaunchConfiguration, PythonExpression
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 from launch_ros.actions import Node
@@ -14,6 +14,7 @@ from launch_ros.parameter_descriptions import ParameterValue
 
 def generate_launch_description():
     bot_description = get_package_share_directory("bot_description")
+    actor_plugin_description = get_package_share_directory("gazebo_ros_actor_plugin")
 
     model_arg = DeclareLaunchArgument(name="model", default_value=os.path.join(
                                         bot_description, "urdf", "bot.urdf.xacro"
@@ -21,12 +22,16 @@ def generate_launch_description():
                                       description="Absolute path to robot urdf file"
     )
 
-    model_path = str(Path(bot_description).parent.resolve())
-    model_path += pathsep + os.path.join(get_package_share_directory("bot_description"), 'models')
+    model_paths = [
+        str(Path(bot_description).parent.resolve()),
+        os.path.join(bot_description, "models"),
+        os.path.join(actor_plugin_description, "config", "models"),
+        os.path.join(actor_plugin_description, "config", "skins"),
+    ]
 
     gazebo_resource_path = SetEnvironmentVariable(
         "GZ_SIM_RESOURCE_PATH",
-        model_path
+        pathsep.join(model_paths)
         )
 
     
@@ -47,12 +52,24 @@ def generate_launch_description():
 
     world_name_arg = DeclareLaunchArgument(name="world_name", default_value="empty")
 
-    world_path = PathJoinSubstitution([
-            bot_description,
-            "worlds",
-            PythonExpression(expression=["'", LaunchConfiguration("world_name"), "'", " + '.world'"])
-        ]
+    actor_baylands_world = os.path.join(
+        actor_plugin_description, "config", "worlds", "baylands.world"
     )
+    default_world_directory = os.path.join(bot_description, "worlds")
+    world_path = PythonExpression([
+        "'", actor_baylands_world, "' if '", LaunchConfiguration("world_name"),
+        "' == 'baylands' else '", default_world_directory, "/' + '",
+        LaunchConfiguration("world_name"), "' + '.world'"
+    ])
+    spawn_x = PythonExpression([
+        "'-73.090393' if '", LaunchConfiguration("world_name"), "' == 'baylands' else '0.0'"
+    ])
+    spawn_y = PythonExpression([
+        "'-112.385361' if '", LaunchConfiguration("world_name"), "' == 'baylands' else '0.0'"
+    ])
+    spawn_z = PythonExpression([
+        "'5.0' if '", LaunchConfiguration("world_name"), "' == 'baylands' else '5.0'"
+    ])
 
     joint_state_pub = Node(
             package='joint_state_publisher',
@@ -79,7 +96,9 @@ def generate_launch_description():
         arguments=[
             "-topic", "robot_description",
             "-name", "bot",
-            "-z", "4.0" 
+            "-x", spawn_x,
+            "-y", spawn_y,
+            "-z", spawn_z,
         ],
     )
 
@@ -96,6 +115,8 @@ def generate_launch_description():
             "/camera/points@sensor_msgs/msg/PointCloud2@gz.msgs.PointCloudPacked",            
             "/drone_image@sensor_msgs/msg/Image@gz.msgs.Image",            
             "/thermal_camera_8bit/image@sensor_msgs/msg/Image@gz.msgs.Image",
+            "/cmd_vel@geometry_msgs/msg/Twist@gz.msgs.Twist",
+            "/cmd_path@geometry_msgs/msg/PoseArray@gz.msgs.Pose_V",
             '/scan' + '@sensor_msgs/msg/LaserScan' + '[' + 'ignition.msgs.LaserScan',
             '/scan/points/points'  + '@sensor_msgs/msg/PointCloud2'   + '[' + 'ignition.msgs.PointCloudPacked',
         ],

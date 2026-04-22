@@ -1,1 +1,7 @@
 bot_description/models/rubicon/meshes/rubicon.dae
+/build/
+/install/
+/log/
+__pycache__/
+*.pyc
+/src/.codex

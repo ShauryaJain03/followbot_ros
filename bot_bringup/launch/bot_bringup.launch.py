@@ -1,6 +1,5 @@
-from launch_ros.actions import Node
-from launch import LaunchDescription
 import os
+from launch import LaunchDescription
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument
@@ -9,23 +8,34 @@ from launch.substitutions import LaunchConfiguration
 
 
 def generate_launch_description():
+    bot_description = get_package_share_directory("bot_description")
+
+    model_arg = DeclareLaunchArgument(
+        "model",
+        default_value=os.path.join(bot_description, "urdf", "bot.urdf.xacro"),
+        description="Absolute path to robot urdf file"
+    )
     world_name_arg = DeclareLaunchArgument(
         "world_name",
         default_value="empty",
         description="World file name (without .world extension)"
     )
 
+    model = LaunchConfiguration("model")
     world_name = LaunchConfiguration("world_name")
 
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(
-                get_package_share_directory('bot_description'),
+                bot_description,
                 'launch',
                 'gazebo.launch.py'
             )
         ),
-        launch_arguments={'world_name': world_name}.items()
+        launch_arguments={
+            'model': model,
+            'world_name': world_name,
+        }.items()
     )
 
     controller = IncludeLaunchDescription(
@@ -38,29 +48,11 @@ def generate_launch_description():
         )
     )
 
-    rule_engine = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(
-                get_package_share_directory("bot_hri"),
-                'launch',
-                'rule_engine.launch.py'
-            )
-        )
-    )
-
-    battery_pub = Node(
-        executable="mock_battery",
-        package="bot_bringup",
-        output="screen"
-    )
-
-    
-
-
 
     return LaunchDescription([
+        model_arg,
         world_name_arg,
         gazebo,
         controller,
-        battery_pub,
+
     ])

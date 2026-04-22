@@ -1,0 +1,95 @@
+<?xml version="1.0"?>
+<sdf version="1.8">
+  <world name="baylands">
+    <physics name="default_physics" type="ode">
+      <max_step_size>0.01</max_step_size>
+      <real_time_update_rate>100</real_time_update_rate>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+
+    <plugin
+      filename="gz-sim-physics-system"
+      name="gz::sim::systems::Physics">
+    </plugin>
+    <plugin
+      filename="gz-sim-user-commands-system"
+      name="gz::sim::systems::UserCommands">
+    </plugin>
+    <plugin
+      filename="gz-sim-scene-broadcaster-system"
+      name="gz::sim::systems::SceneBroadcaster">
+    </plugin>
+    <plugin
+      filename="gz-sim-contact-system"
+      name="gz::sim::systems::Contact">
+    </plugin>
+
+    <light type="directional" name="sun">
+      <cast_shadows>false</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>-0.5 0.5 -1.0</direction>
+    </light>
+
+    <scene>
+      <sky>
+        <clouds>
+          <speed>12</speed>
+        </clouds>
+      </sky>
+    </scene>
+
+
+    <spherical_coordinates>
+      <surface_model>EARTH_WGS84</surface_model>
+      <world_frame_orientation>ENU</world_frame_orientation>
+      <latitude_deg>47.478950</latitude_deg>
+      <longitude_deg>19.057785</longitude_deg>
+      <elevation>0</elevation>
+      <heading_deg>0</heading_deg>
+    </spherical_coordinates>
+
+    <include>
+      <uri>model://baylands</uri>
+      <pose>-2.0 2 0 0 0 0</pose>
+    </include>
+
+    <include>
+      <name>walker_slow_red</name>
+      <pose>-73.090393 -108.385361 0.34 0 0 0</pose>
+      <uri>model://DoctorFemaleWalk</uri>
+      <plugin
+        filename="libgazebo_ros_actor_plugin.so"
+        name="gazebo_ros_actor_plugin::GazeboRosActorCommand">
+        <follow_mode>path</follow_mode>
+        <vel_topic>/cmd_vel</vel_topic>
+        <path_topic>/cmd_path</path_topic>
+        <animation_factor>4.0</animation_factor>
+        <linear_tolerance>0.1</linear_tolerance>
+        <linear_velocity>0.3</linear_velocity>
+        <angular_tolerance>0.0872</angular_tolerance>
+        <angular_velocity>0.3</angular_velocity>
+        <default_rotation>1.57</default_rotation>
+        <terrain>
+          <mesh>model://baylands/media/baylands_01.DAE</mesh>
+          <pose>-2.0 2.0 -1.3 0 0 0</pose>
+        </terrain>
+        <terrain>
+          <mesh>model://baylands/media/baylands_02.DAE</mesh>
+          <pose>-2.0 2.0 -1.3 0 0 0</pose>
+        </terrain>
+        <terrain>
+          <mesh>model://baylands/media/baylands_03.DAE</mesh>
+          <pose>-2.0 2.0 -1.3 0 0 0</pose>
+        </terrain>
+      </plugin>
+    </include>
+  </world>
+</sdf>
