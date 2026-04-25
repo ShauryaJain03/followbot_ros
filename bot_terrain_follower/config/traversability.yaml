@@ -1,0 +1,16 @@
+traversability_analyzer:
+  ros__parameters:
+    pointcloud_topic: /points
+    grid_topic: /traversability_grid
+    markers_topic: /traversability_markers
+    frame_id: map
+    base_frame_id: base_footprint
+    robot_pose_topic: /robot_pose_gt
+    grid_resolution: 0.25
+    grid_width_m: 30.0
+    grid_height_m: 30.0
+    slope_limit_deg: 18.0
+    step_height_limit_m: 0.16
+    roughness_limit_m: 0.08
+    min_points_per_cell: 3
+    unknown_is_blocked: true

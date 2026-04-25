@@ -1,0 +1,45 @@
+robot_ground_truth_publisher:
+  ros__parameters:
+    world_pose_topic: /world/baylands/pose/info
+    robot_entity_name: bot
+    pose_topic: /robot_pose_gt
+    map_frame_id: map
+
+human_pose_publisher:
+  ros__parameters:
+    frame_id: map
+    human_pose_topic: /human_pose
+    publish_rate: 10.0
+    x: 3.0
+    y: 0.0
+    z: 0.0
+    yaw: 0.0
+
+naive_follower:
+  ros__parameters:
+    human_pose_topic: /human_pose
+    robot_pose_topic: /robot_pose_gt
+    cmd_vel_topic: /bot_controller/cmd_vel_unstamped
+    control_rate: 20.0
+    target_distance: 2.5
+    kp_linear: 0.6
+    kp_angular: 1.8
+    max_linear_speed: 0.7
+    max_angular_speed: 1.2
+
+capability_aware_follower:
+  ros__parameters:
+    human_pose_topic: /human_pose
+    robot_pose_topic: /robot_pose_gt
+    traversability_grid_topic: /traversability_grid
+    planned_path_topic: /terrain_follower/path
+    cmd_vel_topic: /bot_controller/cmd_vel_unstamped
+    control_rate: 10.0
+    target_distance: 3.0
+    max_rejoin_distance: 6.0
+
+demo_metrics_logger:
+  ros__parameters:
+    human_pose_topic: /human_pose
+    robot_pose_topic: /robot_pose_gt
+    report_period: 2.0
