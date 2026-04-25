@@ -4,4 +4,13 @@ bot_description/models/rubicon/meshes/rubicon.dae
 /log/
 __pycache__/
 *.pyc
+.DS_Store
+.codex
 /src/.codex
+.vscode/
+gazebo-ros-actor-plugin/config/models/baylands/
+gazebo-ros-actor-plugin/config/models/accessories/
+gazebo-ros-actor-plugin/config/models/office/
+gazebo-ros-actor-plugin/config/models/rubicon/
+gazebo-ros-actor-plugin/config/models/aws_robomaker_residential_*/
+gazebo-ros-actor-plugin/config/models/aws_robomaker_warehouse_*/

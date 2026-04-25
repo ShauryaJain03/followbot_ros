@@ -1,82 +1,112 @@
 #!/usr/bin/env python3
+"""Publish the scripted actor route to the Gazebo actor plugin."""
+
 import math
+
 import rclpy
+from geometry_msgs.msg import Point, Pose, PoseArray, Quaternion
 from rclpy.node import Node
-from geometry_msgs.msg import Point, Quaternion, PoseArray, Pose
 
 
-class PoseArrayPublisher(Node):
+def quaternion_from_yaw(yaw):
+    """Create a planar quaternion from yaw."""
+    return Quaternion(
+        x=0.0,
+        y=0.0,
+        z=math.sin(yaw * 0.5),
+        w=math.cos(yaw * 0.5),
+    )
+
+
+class ActorPathPublisher(Node):
+    """Publish the Baylands staircase actor route once."""
+
     def __init__(self):
-        super().__init__('pose_array_publisher_node')
-        self.publisher = self.create_publisher(PoseArray, '/cmd_path', 10)
-        self.timer = self.create_timer(1.0, self.publish_pose_array)
-        self.published = False
-        self.get_logger().info('PoseArray publisher node started')
+        super().__init__('actor_path_publisher')
+        self.declare_parameter('frame_id', 'map')
+        self.declare_parameter('cmd_path_topic', '/cmd_path')
+        self.declare_parameter('cmd_path_delay', 1.0)
+        self.declare_parameter('num_waypoints', 10)
+        self.declare_parameter('start_x', -73.090393)
+        self.declare_parameter('start_y', -108.385361)
+        self.declare_parameter('start_z', 0.0)
+        self.declare_parameter('waypoint_spacing', 1.0)
+        self.declare_parameter('heading', math.pi / 2.0)
 
-    def publish_pose_array(self):
+        self.publisher = self.create_publisher(
+            PoseArray,
+            self.get_parameter('cmd_path_topic').value,
+            10,
+        )
+        self.waypoints = self.build_waypoints()
+        self.published = False
+
+        cmd_path_delay = self.get_parameter('cmd_path_delay').value
+        self.timer = self.create_timer(
+            cmd_path_delay,
+            self.publish_cmd_path_once,
+        )
+        self.get_logger().info(
+            f'Actor path publisher ready with {len(self.waypoints)} waypoints.'
+        )
+
+    def build_waypoints(self):
+        """Build the Baylands staircase demo route."""
+        num_waypoints = self.get_parameter('num_waypoints').value
+        start_x = self.get_parameter('start_x').value
+        start_y = self.get_parameter('start_y').value
+        start_z = self.get_parameter('start_z').value
+        spacing = self.get_parameter('waypoint_spacing').value
+        heading = self.get_parameter('heading').value
+        quat = quaternion_from_yaw(heading)
+
+        waypoints = []
+        for index in range(num_waypoints):
+            pose = Pose()
+            pose.position = Point(
+                x=start_x,
+                y=start_y + index * spacing,
+                z=start_z,
+            )
+            pose.orientation = quat
+            waypoints.append(pose)
+        return waypoints
+
+    def publish_cmd_path_once(self):
+        """Send the route to the Gazebo actor plugin once."""
         if self.published:
             return
 
-        pose_array_msg = PoseArray()
-        pose_array_msg.header.stamp = self.get_clock().now().to_msg()
-        pose_array_msg.header.frame_id = 'map'
-
-        num_waypoints = 10
-        start_x = -73.090393
-        start_y = -108.385361
-        waypoint_spacing = 1.0
-        heading = 0.0
-        quat = self.euler_to_quaternion(0, 0, heading)
-
-        for i in range(num_waypoints):
-            pose = Pose()
-            pose.position = Point(
-                y=start_y + i * waypoint_spacing,
-                x=start_x,
-                z=0.0)
-
-            pose.orientation = Quaternion(
-                x=quat[0],
-                y=quat[1],
-                z=quat[2],
-                w=quat[3])
-            
-            pose_array_msg.poses.append(pose)
-        self.publisher.publish(pose_array_msg)
-        self.get_logger().info(f'Published PoseArray with {num_waypoints} poses')
-
+        pose_array = PoseArray()
+        pose_array.header.stamp = self.get_clock().now().to_msg()
+        pose_array.header.frame_id = self.get_parameter('frame_id').value
+        pose_array.poses = list(self.waypoints)
+        self.publisher.publish(pose_array)
         self.published = True
+        self.get_logger().info(
+            f'Published actor /cmd_path with {len(self.waypoints)} poses.'
+        )
         self.timer.cancel()
-        self.get_logger().info('PoseArray published successfully. Shutting down...')
-        self.create_timer(0.1, self.destroy_and_exit)
+        self.create_timer(0.1, self.shutdown)
 
-    def destroy_and_exit(self):
+    def shutdown(self):
+        """Stop this one-shot publisher."""
         self.destroy_node()
         raise SystemExit
 
-    def euler_to_quaternion(self, roll, pitch, yaw):
-        cy = math.cos(yaw * 0.5)
-        sy = math.sin(yaw * 0.5)
-        cp = math.cos(pitch * 0.5)
-        sp = math.sin(pitch * 0.5)
-        cr = math.cos(roll * 0.5)
-        sr = math.sin(roll * 0.5)
-
-        q = [0] * 4
-        q[0] = sr * cp * cy - cr * sp * sy
-        q[1] = cr * sp * cy + sr * cp * sy
-        q[2] = cr * cp * sy - sr * sp * cy
-        q[3] = cr * cp * cy + sr * sp * sy
-
-        return q
-
 
 def main(args=None):
+    """Run the actor path publisher."""
     rclpy.init(args=args)
-    pose_array_publisher = PoseArrayPublisher()
-    rclpy.spin(pose_array_publisher)
-    pose_array_publisher.destroy_node()
-    rclpy.shutdown()
+    node = ActorPathPublisher()
+    try:
+        rclpy.spin(node)
+    except (KeyboardInterrupt, SystemExit):
+        pass
+    finally:
+        if rclpy.ok():
+            rclpy.shutdown()
+
 
 if __name__ == '__main__':
     main()

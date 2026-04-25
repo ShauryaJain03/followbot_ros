@@ -1,6 +1,7 @@
 #include <gazebo_ros_actor_plugin/gazebo_ros_actor_command.h>
 
 #include <algorithm>
+#include <chrono>
 
 using namespace gazebo_ros_actor_plugin;
 
@@ -8,6 +9,10 @@ GazeboRosActorCommand::GazeboRosActorCommand()
   : actorEntity_(gz::sim::kNullEntity),
     animationFactor_(4.0),
     lastUpdate_(std::chrono::steady_clock::duration::zero()),
+    lastHumanPublish_(std::chrono::steady_clock::duration::zero()),
+    humanPublishPeriod_(
+      std::chrono::duration_cast<std::chrono::steady_clock::duration>(
+        std::chrono::duration<double>(0.1))),
     followMode_("velocity"),
     targetVel_(gz::math::Pose3d::Zero),
     linVelocity_(1.0),
@@ -17,9 +22,14 @@ GazeboRosActorCommand::GazeboRosActorCommand()
     angTolerance_(IGN_DTOR(5)),
     defaultRotation_(M_PI/2),
     pathCompletedLogged_(false),
+    publishHumanState_(true),
+    humanPathDirty_(false),
     terrainLoaded_(false),
     terrainZOffset_(0.0),
     fallbackZ_(0.0) {
+  this->humanPoseTopic_ = "/human_pose";
+  this->humanPathTopic_ = "/human_path";
+  this->humanFrameId_ = "map";
 }
 
 void GazeboRosActorCommand::Configure(
@@ -64,6 +74,9 @@ void GazeboRosActorCommand::Configure(
   if (_sdf->HasElement("default_rotation")) {
     this->defaultRotation_ = _sdf->Get<double>("default_rotation");
   }
+
+  this->ConfigureRosPublishers(_sdf);
+
   if (_sdf->HasElement("terrain")) {
     auto sdfCopy = _sdf->Clone();
     auto terrainElem = sdfCopy->GetElement("terrain");
@@ -233,12 +246,19 @@ void GazeboRosActorCommand::PreUpdate(
       if (!this->targetPoses_.empty()) {
         this->targetPose_ = this->targetPoses_.at(this->idx_);
         this->pathCompletedLogged_ = false;
+        this->humanPathDirty_ = true;
         ignmsg << "New path loaded with " << this->targetPoses_.size()
           << " waypoints" << std::endl;
       }
     }
 
+    if (this->humanPathDirty_) {
+      this->PublishHumanPath(_info.simTime);
+      this->humanPathDirty_ = false;
+    }
+
     if (this->targetPoses_.empty() || this->idx_ >= static_cast<int>(this->targetPoses_.size())) {
+      this->PublishHumanPose(newPose, _info.simTime);
       this->lastUpdate_ = _info.simTime;
       return;
     }
@@ -343,6 +363,8 @@ void GazeboRosActorCommand::PreUpdate(
       gz::sim::components::AnimationTime::typeId,
       gz::sim::ComponentState::OneTimeChange);
   }
+
+  this->PublishHumanPose(newPose, _info.simTime);
 }
 
 void GazeboRosActorCommand::ChooseNewTarget() {
@@ -351,6 +373,154 @@ void GazeboRosActorCommand::ChooseNewTarget() {
   if (this->idx_ < static_cast<int>(this->targetPoses_.size())) {
     this->targetPose_ = this->targetPoses_.at(this->idx_);
   }
+}
+
+void GazeboRosActorCommand::ConfigureRosPublishers(
+  const std::shared_ptr<const sdf::Element> &_sdf)
+{
+  if (_sdf->HasElement("publish_human_state"))
+  {
+    this->publishHumanState_ = _sdf->Get<bool>("publish_human_state");
+  }
+  if (!this->publishHumanState_)
+  {
+    return;
+  }
+
+  if (_sdf->HasElement("human_pose_topic"))
+  {
+    this->humanPoseTopic_ = _sdf->Get<std::string>("human_pose_topic");
+  }
+  if (_sdf->HasElement("human_path_topic"))
+  {
+    this->humanPathTopic_ = _sdf->Get<std::string>("human_path_topic");
+  }
+  if (_sdf->HasElement("human_frame_id"))
+  {
+    this->humanFrameId_ = _sdf->Get<std::string>("human_frame_id");
+  }
+  if (_sdf->HasElement("human_publish_rate"))
+  {
+    const double publishRate = _sdf->Get<double>("human_publish_rate");
+    if (publishRate > 0.0)
+    {
+      this->humanPublishPeriod_ =
+        std::chrono::duration_cast<std::chrono::steady_clock::duration>(
+          std::chrono::duration<double>(1.0 / publishRate));
+    }
+  }
+
+  auto context = rclcpp::contexts::get_global_default_context();
+  if (!context->is_valid())
+  {
+    int argc = 0;
+    char **argv = nullptr;
+    rclcpp::init(argc, argv);
+  }
+
+  this->rosNode_ = std::make_shared<rclcpp::Node>(
+    "gazebo_actor_state_publisher");
+  this->humanPosePub_ =
+    this->rosNode_->create_publisher<geometry_msgs::msg::PoseStamped>(
+      this->humanPoseTopic_, 10);
+
+  auto pathQos = rclcpp::QoS(1).transient_local();
+  this->humanPathPub_ =
+    this->rosNode_->create_publisher<nav_msgs::msg::Path>(
+      this->humanPathTopic_, pathQos);
+}
+
+void GazeboRosActorCommand::PublishHumanPose(
+  const gz::math::Pose3d &_pose,
+  const std::chrono::steady_clock::duration &_simTime)
+{
+  if (!this->publishHumanState_ || !this->humanPosePub_)
+  {
+    return;
+  }
+
+  if (this->lastHumanPublish_ != std::chrono::steady_clock::duration::zero() &&
+      _simTime - this->lastHumanPublish_ < this->humanPublishPeriod_)
+  {
+    return;
+  }
+
+  this->lastHumanPublish_ = _simTime;
+
+  geometry_msgs::msg::PoseStamped msg;
+  msg.header.stamp = ToRosTime(_simTime);
+  msg.header.frame_id = this->humanFrameId_;
+  msg.pose.position.x = _pose.Pos().X();
+  msg.pose.position.y = _pose.Pos().Y();
+  msg.pose.position.z = _pose.Pos().Z();
+  msg.pose.orientation.x = _pose.Rot().X();
+  msg.pose.orientation.y = _pose.Rot().Y();
+  msg.pose.orientation.z = _pose.Rot().Z();
+  msg.pose.orientation.w = _pose.Rot().W();
+  this->humanPosePub_->publish(msg);
+  this->PublishHumanPath(_simTime);
+}
+
+void GazeboRosActorCommand::PublishHumanPath(
+  const std::chrono::steady_clock::duration &_simTime)
+{
+  if (!this->publishHumanState_ || !this->humanPathPub_ ||
+      this->targetPoses_.empty())
+  {
+    return;
+  }
+
+  nav_msgs::msg::Path path;
+  path.header.stamp = ToRosTime(_simTime);
+  path.header.frame_id = this->humanFrameId_;
+
+  const auto poseCount = this->targetPoses_.size();
+  constexpr double kMinHeadingSegmentLength = 1e-6;
+
+  for (std::size_t poseIdx = 0; poseIdx < poseCount; ++poseIdx)
+  {
+    const auto &target = this->targetPoses_.at(poseIdx);
+    geometry_msgs::msg::PoseStamped pose;
+    pose.header = path.header;
+    pose.pose.position.x = target.X();
+    pose.pose.position.y = target.Y();
+
+    auto terrainZ = this->TerrainHeight(target.X(), target.Y());
+    pose.pose.position.z = terrainZ.has_value() ?
+      terrainZ.value() + this->terrainZOffset_ : this->fallbackZ_;
+
+    double yaw = target.Z();
+    if (poseCount > 1)
+    {
+      gz::math::Vector2d segment;
+      if (poseIdx + 1 < poseCount)
+      {
+        const auto &nextTarget = this->targetPoses_.at(poseIdx + 1);
+        segment.X(nextTarget.X() - target.X());
+        segment.Y(nextTarget.Y() - target.Y());
+      }
+      else
+      {
+        const auto &previousTarget = this->targetPoses_.at(poseIdx - 1);
+        segment.X(target.X() - previousTarget.X());
+        segment.Y(target.Y() - previousTarget.Y());
+      }
+
+      if (segment.Length() > kMinHeadingSegmentLength)
+      {
+        yaw = std::atan2(segment.Y(), segment.X());
+      }
+    }
+
+    gz::math::Quaterniond quat(0.0, 0.0, yaw);
+    pose.pose.orientation.x = quat.X();
+    pose.pose.orientation.y = quat.Y();
+    pose.pose.orientation.z = quat.Z();
+    pose.pose.orientation.w = quat.W();
+    path.poses.push_back(pose);
+  }
+
+  this->humanPathPub_->publish(path);
 }
 
 void GazeboRosActorCommand::LoadTerrainMeshes(const sdf::ElementPtr &_terrainElem)
@@ -489,6 +659,20 @@ std::optional<double> GazeboRosActorCommand::IntersectVerticalRay(
   }
 
   return u * _triangle.b.Z() + v * _triangle.c.Z() + w * _triangle.a.Z();
+}
+
+builtin_interfaces::msg::Time GazeboRosActorCommand::ToRosTime(
+  const std::chrono::steady_clock::duration &_simTime)
+{
+  const auto seconds =
+    std::chrono::duration_cast<std::chrono::seconds>(_simTime);
+  const auto nanoseconds =
+    std::chrono::duration_cast<std::chrono::nanoseconds>(_simTime - seconds);
+
+  builtin_interfaces::msg::Time stamp;
+  stamp.sec = static_cast<int32_t>(seconds.count());
+  stamp.nanosec = static_cast<uint32_t>(nanoseconds.count());
+  return stamp;
 }
 
 IGNITION_ADD_PLUGIN(

@@ -54,6 +54,10 @@ def generate_launch_description():
     )
 
     world_name_arg = DeclareLaunchArgument(name="world_name", default_value="empty")
+    world_pose_bridge = PythonExpression([
+        "'/world/' + '", LaunchConfiguration("world_name"),
+        "' + '/pose/info@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V'"
+    ])
 
     world_path = PathJoinSubstitution([
             bot_description,
@@ -99,12 +103,13 @@ def generate_launch_description():
             "/camera/depth_image@sensor_msgs/msg/Image@gz.msgs.Image",
             "/navsat@sensor_msgs/msg/NavSatFix@gz.msgs.NavSat",
             "/camera/points@sensor_msgs/msg/PointCloud2@gz.msgs.PointCloudPacked",
+            world_pose_bridge,
             '/scan' + '@sensor_msgs/msg/LaserScan' + '[' + 'ignition.msgs.LaserScan',
-            '/scan/points/points'  + '@sensor_msgs/msg/PointCloud2'   + '[' + 'ignition.msgs.PointCloudPacked',],
+            '/lidar_3d/points'  + '@sensor_msgs/msg/PointCloud2'   + '[' + 'ignition.msgs.PointCloudPacked',],
         parameters= [{'qos_overrides./diff_drive_example.subscriber.reliability': 'reliable'}],
         remappings= [
                     ('/scan',     '/scan'   ),
-                    ('/scan/points/points', '/points'),
+                    ('/lidar_3d/points', '/points'),
                     ],
         output="screen"
     )

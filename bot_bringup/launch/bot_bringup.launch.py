@@ -3,8 +3,9 @@ from launch import LaunchDescription
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument
+from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, PythonExpression
 
 
 def generate_launch_description():
@@ -23,6 +24,9 @@ def generate_launch_description():
 
     model = LaunchConfiguration("model")
     world_name = LaunchConfiguration("world_name")
+    is_baylands_world = PythonExpression([
+        "'", world_name, "' == 'baylands'"
+    ])
 
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -48,11 +52,21 @@ def generate_launch_description():
         )
     )
 
+    actor_path_publisher = Node(
+        package='gazebo_ros_actor_plugin',
+        executable='path_publisher.py',
+        name='actor_path_publisher',
+        condition=IfCondition(is_baylands_world),
+        parameters=[{
+            'cmd_path_delay': 5.0,
+        }],
+        output='screen',
+    )
 
     return LaunchDescription([
         model_arg,
         world_name_arg,
         gazebo,
         controller,
-
+        actor_path_publisher,
     ])

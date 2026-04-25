@@ -61,6 +61,10 @@ def generate_launch_description():
         "' == 'baylands' else '", default_world_directory, "/' + '",
         LaunchConfiguration("world_name"), "' + '.world'"
     ])
+    world_pose_bridge = PythonExpression([
+        "'/world/' + '", LaunchConfiguration("world_name"),
+        "' + '/pose/info@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V'"
+    ])
     spawn_x = PythonExpression([
         "'-73.090393' if '", LaunchConfiguration("world_name"), "' == 'baylands' else '0.0'"
     ])
@@ -68,7 +72,7 @@ def generate_launch_description():
         "'-112.385361' if '", LaunchConfiguration("world_name"), "' == 'baylands' else '0.0'"
     ])
     spawn_z = PythonExpression([
-        "'5.0' if '", LaunchConfiguration("world_name"), "' == 'baylands' else '5.0'"
+        "'5.0' if '", LaunchConfiguration("world_name"), "' == 'baylands' else '0.05'"
     ])
 
     joint_state_pub = Node(
@@ -117,15 +121,16 @@ def generate_launch_description():
             "/thermal_camera_8bit/image@sensor_msgs/msg/Image@gz.msgs.Image",
             "/cmd_vel@geometry_msgs/msg/Twist@gz.msgs.Twist",
             "/cmd_path@geometry_msgs/msg/PoseArray@gz.msgs.Pose_V",
+            world_pose_bridge,
             '/scan' + '@sensor_msgs/msg/LaserScan' + '[' + 'ignition.msgs.LaserScan',
-            '/scan/points/points'  + '@sensor_msgs/msg/PointCloud2'   + '[' + 'ignition.msgs.PointCloudPacked',
+            '/lidar_3d/points'  + '@sensor_msgs/msg/PointCloud2'   + '[' + 'ignition.msgs.PointCloudPacked',
         ],
         parameters=[
             {'qos_overrides./diff_drive_example.subscriber.reliability': 'reliable','use_sim_time': True}
         ],
         remappings= [
                     ('/scan',     '/scan'   ),
-                    ('/scan/points/points', '/points'),
+                    ('/lidar_3d/points', '/points'),
                     ('/imu','/imu_raw')
                     ],
         output="screen"

@@ -4,6 +4,7 @@
 
 - velocity control from `/cmd_vel`
 - waypoint following from `/cmd_path`
+- follower-facing actor route and actual actor pose publishing on `/human_path` and `/human_pose`
 - optional terrain-aware height tracking over mesh terrain
 
 The package includes a flat-ground sample world and a Baylands example world.
@@ -70,7 +71,15 @@ Path following:
 ros2 run gazebo_ros_actor_plugin path_publisher.py
 ```
 
-The bundled path publisher sends a straight 10-waypoint path in the Baylands example area.
+The bundled path publisher sends a straight 10-waypoint path in the Baylands
+example area. The actor plugin publishes follower-facing state from the actual
+Gazebo actor:
+
+- `/human_path` (`nav_msgs/msg/Path`): full actor route received by the plugin.
+- `/human_pose` (`geometry_msgs/msg/PoseStamped`): current actor pose from Gazebo.
+
+When `bot_bringup` is launched with `world_name:=baylands`, this publisher is
+started automatically after a short delay.
 
 ## Terrain-Aware Height
 
@@ -117,6 +126,15 @@ Subscribed topics:
 
 - `/cmd_vel` with type `geometry_msgs/msg/Twist`
 - `/cmd_path` with type `geometry_msgs/msg/PoseArray`
+
+Published topics from `path_publisher.py`:
+
+- `/cmd_path` with type `geometry_msgs/msg/PoseArray`
+
+Published topics from the actor plugin:
+
+- `/human_path` with type `nav_msgs/msg/Path`
+- `/human_pose` with type `geometry_msgs/msg/PoseStamped`
 
 ## Assets
 

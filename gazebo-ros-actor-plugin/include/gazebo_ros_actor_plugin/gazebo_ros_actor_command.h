@@ -34,6 +34,11 @@
 #include <gz/msgs/twist.pb.h>
 #include <gz/transport/Node.hh>
 
+#include <builtin_interfaces/msg/time.hpp>
+#include <geometry_msgs/msg/pose_stamped.hpp>
+#include <nav_msgs/msg/path.hpp>
+#include <rclcpp/rclcpp.hpp>
+
 #include <sdf/Element.hh>
 
 namespace gazebo_ros_actor_plugin {
@@ -73,6 +78,12 @@ class GazeboRosActorCommand :
    void VelCallback(const gz::msgs::Twist &msg);
    void PathCallback(const gz::msgs::Pose_V &msg);
    void ChooseNewTarget();
+   void ConfigureRosPublishers(const std::shared_ptr<const sdf::Element> &_sdf);
+   void PublishHumanPose(
+     const gz::math::Pose3d &_pose,
+     const std::chrono::steady_clock::duration &_simTime);
+   void PublishHumanPath(
+     const std::chrono::steady_clock::duration &_simTime);
    void LoadTerrainMeshes(const sdf::ElementPtr &_terrainElem);
    bool LoadTerrainMesh(const TerrainMesh &_terrain);
    std::optional<double> TerrainHeight(double _x, double _y) const;
@@ -83,13 +94,23 @@ class GazeboRosActorCommand :
      const TerrainTriangle &_triangle,
      double _x,
      double _y);
+   static builtin_interfaces::msg::Time ToRosTime(
+     const std::chrono::steady_clock::duration &_simTime);
 
    gz::transport::Node node_;
+   rclcpp::Node::SharedPtr rosNode_;
+   rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr humanPosePub_;
+   rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr humanPathPub_;
    std::string velTopic_;
    std::string pathTopic_;
+   std::string humanPoseTopic_;
+   std::string humanPathTopic_;
+   std::string humanFrameId_;
    gz::sim::Entity actorEntity_;
    double animationFactor_;
    std::chrono::steady_clock::duration lastUpdate_;
+   std::chrono::steady_clock::duration lastHumanPublish_;
+   std::chrono::steady_clock::duration humanPublishPeriod_;
    std::string followMode_;
    gz::math::Pose3d targetVel_;
    double linVelocity_;
@@ -104,6 +125,8 @@ class GazeboRosActorCommand :
    std::queue<std::vector<gz::math::Vector3d>> pathQueue_;
    std::mutex mutex_;
    bool pathCompletedLogged_;
+   bool publishHumanState_;
+   bool humanPathDirty_;
    std::vector<TerrainMesh> terrainMeshes_;
    std::vector<TerrainTriangle> terrainTriangles_;
    bool terrainLoaded_;

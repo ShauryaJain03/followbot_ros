@@ -1,7 +1,64 @@
 <?xml version="1.0" ?>
-  <robot name="bot" xmlns:xacro="http://ros.org/wiki/xacro">
+<robot name="bot" xmlns:xacro="http://ros.org/wiki/xacro">
 
   <xacro:include filename="bot_ros2_control.xacro" />
+
+  <xacro:property name="chassis_length" value="1.25"/>
+  <xacro:property name="chassis_width" value="0.85"/>
+  <xacro:property name="chassis_height" value="0.40"/>
+  <xacro:property name="ground_clearance" value="0.20"/>
+  <xacro:property name="payload_deck_height" value="0.08"/>
+  <xacro:property name="payload_deck_length" value="0.95"/>
+  <xacro:property name="payload_deck_width" value="0.65"/>
+  <xacro:property name="base_mass" value="45.0"/>
+  <xacro:property name="wheel_radius" value="0.28"/>
+  <xacro:property name="wheel_width" value="0.14"/>
+  <xacro:property name="wheel_mass" value="4.0"/>
+  <xacro:property name="wheelbase" value="0.95"/>
+  <xacro:property name="track_width" value="1.04"/>
+  <xacro:property name="lidar_mast_height" value="0.55"/>
+  <xacro:property name="base_z" value="${ground_clearance + chassis_height / 2.0}"/>
+  <xacro:property name="wheel_z" value="${wheel_radius - base_z}"/>
+
+  <xacro:macro name="wheel_link" params="name">
+    <link name="${name}">
+      <inertial>
+        <mass value="${wheel_mass}"/>
+        <inertia
+          ixx="${wheel_mass * (3 * wheel_radius * wheel_radius + wheel_width * wheel_width) / 12.0}"
+          iyy="${wheel_mass * (3 * wheel_radius * wheel_radius + wheel_width * wheel_width) / 12.0}"
+          izz="${wheel_mass * wheel_radius * wheel_radius / 2.0}"
+          ixy="0.0" ixz="0.0" iyz="0.0"/>
+      </inertial>
+
+      <visual>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+        <material name="offroad_tire">
+          <color rgba="0.04 0.04 0.04 1"/>
+        </material>
+      </visual>
+
+      <collision>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+      </collision>
+    </link>
+  </xacro:macro>
+
+  <xacro:macro name="wheel_contact" params="link">
+    <gazebo reference="${link}">
+      <mu1>1.4</mu1>
+      <mu2>0.9</mu2>
+      <kp>500000.0</kp>
+      <kd>50.0</kd>
+      <minDepth>0.001</minDepth>
+      <maxVel>0.2</maxVel>
+      <fdir1>1 0 0</fdir1>
+    </gazebo>
+  </xacro:macro>
 
 
   <link name="base_footprint">
@@ -10,119 +67,57 @@
   <joint name="base_joint" type="fixed">
     <parent link="base_footprint"/>
     <child link="base_link"/>
-    <origin xyz="0.0 0.0 0.15" rpy="0.0 0.0 3.14159"/>  
+    <origin xyz="0.0 0.0 ${base_z}" rpy="0.0 0.0 ${pi}"/>
   </joint>
 
 <link name="base_link">
   <visual>
     <geometry>
-      <box size="0.8 0.7 0.2"/>
+      <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
     </geometry>
     <material name="gray">
       <color rgba="0.2 0.2 0.2 1" />
     </material>
   </visual>
 
+  <visual>
+    <origin xyz="0 0 ${chassis_height / 2.0 + payload_deck_height / 2.0}" rpy="0 0 0"/>
+    <geometry>
+      <box size="${payload_deck_length} ${payload_deck_width} ${payload_deck_height}"/>
+    </geometry>
+    <material name="payload_deck_black">
+      <color rgba="0.08 0.08 0.08 1"/>
+    </material>
+  </visual>
+
   <collision>
     <geometry>
-      <box size="0.8 0.7 0.2"/>
+      <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
+    </geometry>
+  </collision>
+
+  <collision>
+    <origin xyz="0 0 ${chassis_height / 2.0 + payload_deck_height / 2.0}" rpy="0 0 0"/>
+    <geometry>
+      <box size="${payload_deck_length} ${payload_deck_width} ${payload_deck_height}"/>
     </geometry>
   </collision>
 
   <inertial>
-    <mass value="2"/>
-    <inertia ixx="0.0817" iyy="0.1067" izz="0.18" ixy="0.0" ixz="0.0" iyz="0.0"/>
+    <mass value="${base_mass}"/>
+    <inertia
+      ixx="${base_mass * (chassis_width * chassis_width + chassis_height * chassis_height) / 12.0}"
+      iyy="${base_mass * (chassis_length * chassis_length + chassis_height * chassis_height) / 12.0}"
+      izz="${base_mass * (chassis_length * chassis_length + chassis_width * chassis_width) / 12.0}"
+      ixy="0.0" ixz="0.0" iyz="0.0"/>
   </inertial>
 </link>
 
 
-  <link name="wheel_front_right">
-  <inertial>
-    <mass value="0.5"/>  <!-- OK for small wheels -->
-    <inertia ixx="0.00156" iyy="0.00156" izz="0.0025" ixy="0.0" ixz="0.0" iyz="0.0"/>
-  </inertial>
-
-  <visual>
-    <geometry>
-      <cylinder radius="0.10" length="0.05"/>
-    </geometry>
-    <material name="white">
-      <color rgba="1 1 1 1"/>
-    </material>
-  </visual>
-
-  <collision>
-    <geometry>
-      <cylinder radius="0.10" length="0.05"/>
-    </geometry>
-  </collision>
-  </link>
-
-  <link name="wheel_front_left">
-  <inertial>
-    <mass value="0.5"/>  
-    <inertia ixx="0.00156" iyy="0.00156" izz="0.0025" ixy="0.0" ixz="0.0" iyz="0.0"/>
-  </inertial>
-
-  <visual>
-    <geometry>
-      <cylinder radius="0.10" length="0.05"/>
-    </geometry>
-    <material name="white">
-      <color rgba="1 1 1 1"/>
-    </material>
-  </visual>
-
-  <collision>
-    <geometry>
-      <cylinder radius="0.10" length="0.05"/>
-    </geometry>
-  </collision>
-  </link>
-
-<link name="wheel_back_right">
-  <inertial>
-    <mass value="0.5"/>  
-    <inertia ixx="0.00156" iyy="0.00156" izz="0.0025" ixy="0.0" ixz="0.0" iyz="0.0"/>
-  </inertial>
-
-  <visual>
-    <geometry>
-      <cylinder radius="0.10" length="0.05"/>
-    </geometry>
-    <material name="white">
-      <color rgba="1 1 1 1"/>
-    </material>
-  </visual>
-
-  <collision>
-    <geometry>
-      <cylinder radius="0.10" length="0.05"/>
-    </geometry>
-  </collision>
-  </link>
-
-<link name="wheel_back_left">
-  <inertial>
-    <mass value="0.5"/> 
-    <inertia ixx="0.00156" iyy="0.00156" izz="0.0025" ixy="0.0" ixz="0.0" iyz="0.0"/>
-  </inertial>
-
-  <visual>
-    <geometry>
-      <cylinder radius="0.10" length="0.05"/>
-    </geometry>
-    <material name="white">
-      <color rgba="1 1 1 1"/>
-    </material>
-  </visual>
-
-  <collision>
-    <geometry>
-      <cylinder radius="0.10" length="0.05"/>
-    </geometry>
-  </collision>
-</link>
+  <xacro:wheel_link name="wheel_front_right"/>
+  <xacro:wheel_link name="wheel_front_left"/>
+  <xacro:wheel_link name="wheel_back_right"/>
+  <xacro:wheel_link name="wheel_back_left"/>
 
   <link name="rgb_camera">
     <inertial>
@@ -132,25 +127,25 @@
     </inertial>
 
     <visual>
-      
+      <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="0.1 0.1 0.1"/>
+        <box size="0.12 0.12 0.10"/>
       </geometry>
       <material name="blue">
         <color rgba="0 0 1 1"/>
       </material>
-    </visual>    <origin xyz="-0.35 0 0.15" rpy="0 0.0 3.14"/>
+    </visual>
 
 
     <collision>
       <geometry>
-          <box size="0.1 0.1 0.1"/>
+          <box size="0.12 0.12 0.10"/>
       </geometry>
     </collision>
   </link>
 
   <joint name="camera_joint" type="fixed">
-    <origin xyz="-0.43 0 0.0" rpy="0 0.0 3.14"/>
+    <origin xyz="${-chassis_length / 2.0 - 0.08} 0 ${chassis_height / 2.0 - 0.05}" rpy="0 0.0 ${pi}"/>
     <parent link="base_link"/>
     <child link="rgb_camera"/>
     <axis xyz="0.0 0 0"/>
@@ -218,7 +213,7 @@
   </link>
 
   <joint name="laser_joint" type="fixed">
-    <origin xyz="0 0 0.3" rpy="0 0.0 3.14"/>
+    <origin xyz="0 0 ${chassis_height / 2.0 + lidar_mast_height}" rpy="0 0.0 ${pi}"/>
     <parent link="base_link"/>
     <child link="laser_link"/>
     <axis xyz="0.0 0.0 1.0"/>
@@ -258,16 +253,16 @@
 
   <gazebo reference="laser_link">
     <sensor type="gpu_lidar" name="generic_lidar_sensor">
-        <update_rate>50</update_rate>
-        <visualize>true</visualize>
+        <update_rate>15</update_rate>
+        <visualize>false</visualize>
         <always_on>true</always_on>
         <frame_id>laser_link</frame_id>
         <ignition_frame_id>laser_link</ignition_frame_id>
-        <topic>/scan/points</topic>
+        <topic>/lidar_3d</topic>
         <lidar>
           <scan>
             <horizontal>
-              <samples>3600</samples>
+              <samples>2400</samples>
               <resolution>1.0</resolution>
               <min_angle>-3.1415926</min_angle>
               <max_angle>3.1415926</max_angle>
@@ -281,9 +276,14 @@
           </scan>
           <range>
             <min>0.3</min>
-            <max>100</max>
-            <resolution>0.001</resolution>
+            <max>40</max>
+            <resolution>0.02</resolution>
           </range>
+          <noise>
+            <type>gaussian</type>
+            <mean>0.0</mean>
+            <stddev>0.025</stddev>
+          </noise>
         </lidar>
     </sensor>
     <sensor type="gpu_lidar" name="generic_twold_lidar_sensor">
@@ -408,8 +408,8 @@
     </sensor>
   </gazebo>
 
-    <joint name="wheel_front_right_joint" type="continuous">
-    <origin xyz="-0.25 0.4 -0.05" rpy="1.57 0.0 0.0"/>
+  <joint name="wheel_front_right_joint" type="continuous">
+    <origin xyz="${-wheelbase / 2.0} ${track_width / 2.0} ${wheel_z}" rpy="${pi / 2.0} 0.0 0.0"/>
     <parent link="base_link"/>
     <child link="wheel_front_right"/>
     <axis xyz="0.0 0.0 1.0"/>
@@ -417,15 +417,15 @@
 
 
   <joint name="wheel_front_left_joint" type="continuous">
-    <origin xyz="-0.25 -0.4 -0.05" rpy="1.57 0.0 0.0"/>
+    <origin xyz="${-wheelbase / 2.0} ${-track_width / 2.0} ${wheel_z}" rpy="${pi / 2.0} 0.0 0.0"/>
     <parent link="base_link"/>
     <child link="wheel_front_left"/>
     <axis xyz="0.0 0.0 1.0"/>
 
   </joint>
 
-    <joint name="wheel_back_right_joint" type="continuous">
-    <origin xyz="0.25 0.4 -0.05" rpy="1.57 0.0 0.0"/>
+  <joint name="wheel_back_right_joint" type="continuous">
+    <origin xyz="${wheelbase / 2.0} ${track_width / 2.0} ${wheel_z}" rpy="${pi / 2.0} 0.0 0.0"/>
     <parent link="base_link"/>
     <child link="wheel_back_right"/>
     <axis xyz="0.0 0.0 1.0"/>
@@ -433,52 +433,17 @@
   </joint>
 
   <joint name="wheel_back_left_joint" type="continuous">
-    <origin xyz="0.25 -0.4 -0.05" rpy="1.57 0.0 0.0"/>
+    <origin xyz="${wheelbase / 2.0} ${-track_width / 2.0} ${wheel_z}" rpy="${pi / 2.0} 0.0 0.0"/>
     <parent link="base_link"/>
     <child link="wheel_back_left"/>
     <axis xyz="0.0 0.0 1.0"/>
 
   </joint>
 
-    <gazebo reference="wheel_front_right">
-    <mu1>1.0</mu1>       
-    <mu2>0.8</mu2>        
-    <kp>100000.0</kp>     
-    <kd>10.0</kd>           
-    <minDepth>0.001</minDepth>   
-    <maxVel>1</maxVel>         
-    <fdir1>1 0 0</fdir1>     
-    </gazebo>
-
-    <gazebo reference="wheel_front_left">
-    <mu1>1.0</mu1>       
-    <mu2>0.8</mu2>        
-    <kp>100000.0</kp>     
-    <kd>10.0</kd>           
-    <minDepth>0.001</minDepth>   
-    <maxVel>1</maxVel>         
-    <fdir1>1 0 0</fdir1>   
-    </gazebo>
-
-    <gazebo reference="wheel_back_right">
-    <mu1>1.0</mu1>       
-    <mu2>0.8</mu2>        
-    <kp>100000.0</kp>     
-    <kd>10.0</kd>           
-    <minDepth>0.001</minDepth>   
-    <maxVel>1</maxVel>         
-    <fdir1>1 0 0</fdir1>   
-    </gazebo>
-
-    <gazebo reference="wheel_back_left">
-    <mu1>1.0</mu1>       
-    <mu2>0.8</mu2>          
-    <kp>100000.0</kp>     
-    <kd>10.0</kd>           
-    <minDepth>0.001</minDepth>   
-    <maxVel>1</maxVel>         
-    <fdir1>1 0 0</fdir1>   
-    </gazebo>
+  <xacro:wheel_contact link="wheel_front_right"/>
+  <xacro:wheel_contact link="wheel_front_left"/>
+  <xacro:wheel_contact link="wheel_back_right"/>
+  <xacro:wheel_contact link="wheel_back_left"/>
 
     <gazebo>
         <plugin filename="ign_ros2_control-system" name="ign_ros2_control::IgnitionROS2ControlPlugin">

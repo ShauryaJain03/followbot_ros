@@ -66,6 +66,11 @@
         <follow_mode>path</follow_mode>
         <vel_topic>/cmd_vel</vel_topic>
         <path_topic>/cmd_path</path_topic>
+        <publish_human_state>true</publish_human_state>
+        <human_pose_topic>/human_pose</human_pose_topic>
+        <human_path_topic>/human_path</human_path_topic>
+        <human_frame_id>map</human_frame_id>
+        <human_publish_rate>10.0</human_publish_rate>
         <animation_factor>4.0</animation_factor>
         <linear_tolerance>0.1</linear_tolerance>
         <linear_velocity>0.3</linear_velocity>
