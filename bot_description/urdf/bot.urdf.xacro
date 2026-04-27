@@ -163,10 +163,10 @@
   <gazebo reference="rgbd_camera">
     <sensor name="rgbd_camera" type="rgbd_camera">
       <camera>
-        <horizontal_fov>1.25</horizontal_fov>
+        <horizontal_fov>1.10</horizontal_fov>
         <image>
-          <width>320</width>
-          <height>240</height>
+          <width>960</width>
+          <height>540</height>
         </image>
         <clip>
           <near>0.3</near>
