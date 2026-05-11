@@ -95,15 +95,14 @@ docker run --rm -it \
 ```
 
 12. Launch LIO SAM
-    ```sh 
-   ros2 launch lio_sam run.launch.py params_file:=/root/lio_sam_baylands_params.yaml
-    ```
+```sh
+ros2 launch lio_sam run.launch.py params_file:=/root/lio_sam_baylands_params.yaml
+```
 
-13. run human detector
-    ```sh 
+14. run human detector
+```sh 
 ros2 launch human_detector human_detector.launch.py   camera_frame_id:=rgbd_camera   horizontal_fov:=1.10   use_sim:=True   pose_landmarker_model_path:=/home/shaurya/models/pose_landmarker_full.task
-
-    ```
+```
 
 14. run detector
 ```sh
@@ -139,29 +138,4 @@ Shaurya Jain - Reach me at jainshaurya.sj@gmail.com
 
 ### Citation
 
-```bibtex
-@misc{terrain_aware_assistance_bot,
-  title        = {Terrain Aware Payload Delivery Robot},
-  author       = {Shaurya Jain},
-  year         = {2025},
-  url          = {https://github.com/ShauryaJain03/followbot_ros},
-}
 
-
-
-
-docker run --rm -it \
-  --name liosam-humble-jammy-container \
-  --net=host \
-  --ipc=host \
-  --shm-size=2g \
-  --privileged \
-  -e DISPLAY=$DISPLAY \
-  -e QT_X11_NO_MITSHM=1 \
-  -e ROS_LOCALHOST_ONLY=0 \
-  -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
-  -v /home/shaurya/followbot_ws/src/followbot_ros/bot_description/config/lio_sam_baylands_params.yaml:/root/lio_sam_baylands_params.yaml:ro \
-  liosam-humble-jammy:latest \
-  bash
-
-ros2 launch lio_sam run.launch.py params_file:=/root/lio_sam_baylands_params.yaml
