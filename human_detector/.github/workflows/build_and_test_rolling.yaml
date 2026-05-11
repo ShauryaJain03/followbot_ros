@@ -1,0 +1,25 @@
+---
+name: Build and Test (rolling)
+
+on:
+    pull_request:
+    push:
+        branches: [rolling]
+
+    schedule:
+        - cron: "0 0 * * *"
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        container:
+            image: ubuntu:noble
+        env:
+            PIP_BREAK_SYSTEM_PACKAGES: 1
+        steps:
+            - uses: ros-tooling/setup-ros@v0.7
+              with:
+                  use-ros2-testing: true
+            - uses: ros-tooling/action-ros-ci@v0.4
+              with:
+                  target-ros2-distro: rolling

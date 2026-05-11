@@ -2,7 +2,7 @@ bt_navigator:
   ros__parameters:
     use_sim_time: True
     global_frame: map
-    robot_base_frame: base_footprint
+    robot_base_frame: base_link
     odom_topic: /bot_controller/odom
     bt_loop_duration: 10
     default_server_timeout: 20
@@ -169,7 +169,7 @@ local_costmap:
       update_frequency: 5.0
       publish_frequency: 2.0
       global_frame: odom
-      robot_base_frame: base_footprint
+      robot_base_frame: base_link
       use_sim_time: True
       rolling_window: true
       width: 5
@@ -212,7 +212,7 @@ global_costmap:
       update_frequency: 1.0
       publish_frequency: 1.0
       global_frame: map
-      robot_base_frame: base_footprint
+      robot_base_frame: base_link
       use_sim_time: True
       footprint: "[ [0.76, 0.59], [-0.76, 0.59], [-0.76, -0.59], [0.76, -0.59] ]"
       resolution: 0.06
@@ -300,7 +300,7 @@ behavior_server:
     assisted_teleop:
       plugin: "nav2_behaviors/AssistedTeleop"
     global_frame: map
-    robot_base_frame: base_footprint
+    robot_base_frame: base_link
     transform_tolerance: 0.1
     use_sim_time: true
     simulate_ahead_time: 2.0

@@ -39,6 +39,7 @@
     </light>
 
     <scene>
+      <shadows>false</shadows>
       <sky>
         <clouds>
           <speed>12</speed>

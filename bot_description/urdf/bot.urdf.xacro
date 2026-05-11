@@ -1,6 +1,7 @@
 <?xml version="1.0" ?>
 <robot name="bot" xmlns:xacro="http://ros.org/wiki/xacro">
 
+  <xacro:arg name="controller_params_file" default="$(find bot_controller)/config/bot_controller.yaml"/>
   <xacro:include filename="bot_ros2_control.xacro" />
 
   <xacro:property name="chassis_length" value="1.25"/>
@@ -16,7 +17,7 @@
   <xacro:property name="wheel_mass" value="4.0"/>
   <xacro:property name="wheelbase" value="0.95"/>
   <xacro:property name="track_width" value="1.04"/>
-  <xacro:property name="lidar_mast_height" value="0.55"/>
+  <xacro:property name="lidar_mast_height" value="0.25"/>
   <xacro:property name="base_z" value="${ground_clearance + chassis_height / 2.0}"/>
   <xacro:property name="wheel_z" value="${wheel_radius - base_z}"/>
 
@@ -50,8 +51,8 @@
 
   <xacro:macro name="wheel_contact" params="link">
     <gazebo reference="${link}">
-      <mu1>1.4</mu1>
-      <mu2>0.9</mu2>
+      <mu1>1.2</mu1>
+      <mu2>0.8</mu2>
       <kp>500000.0</kp>
       <kd>50.0</kd>
       <minDepth>0.001</minDepth>
@@ -59,16 +60,6 @@
       <fdir1>1 0 0</fdir1>
     </gazebo>
   </xacro:macro>
-
-
-  <link name="base_footprint">
-  </link>
-    
-  <joint name="base_joint" type="fixed">
-    <parent link="base_footprint"/>
-    <child link="base_link"/>
-    <origin xyz="0.0 0.0 ${base_z}" rpy="0.0 0.0 ${pi}"/>
-  </joint>
 
 <link name="base_link">
   <visual>
@@ -145,7 +136,7 @@
   </link>
 
   <joint name="camera_joint" type="fixed">
-    <origin xyz="${-chassis_length / 2.0 - 0.08} 0 ${chassis_height / 2.0 - 0.05}" rpy="0 0.0 ${pi}"/>
+    <origin xyz="${chassis_length / 2.0 + 0.08} 0 ${chassis_height / 2.0 - 0.05}" rpy="0 0 0"/>
     <parent link="base_link"/>
     <child link="rgbd_camera"/>
     <axis xyz="0.0 0 0"/>
@@ -207,7 +198,7 @@
   </link>
 
   <joint name="laser_joint" type="fixed">
-    <origin xyz="0 0 ${chassis_height / 2.0 + lidar_mast_height}" rpy="0 0.0 ${pi}"/>
+    <origin xyz="0 0 ${chassis_height / 2.0 + lidar_mast_height}" rpy="0 0 0"/>
     <parent link="base_link"/>
     <child link="laser_link"/>
     <axis xyz="0.0 0.0 1.0"/>
@@ -247,38 +238,38 @@
 
   <gazebo reference="laser_link">
     <sensor type="gpu_lidar" name="generic_lidar_sensor">
-        <update_rate>15</update_rate>
-        <visualize>false</visualize>
-        <always_on>true</always_on>
-        <frame_id>laser_link</frame_id>
-        <ignition_frame_id>laser_link</ignition_frame_id>
-        <topic>/lidar_3d</topic>
-        <lidar>
-          <scan>
-            <horizontal>
-              <samples>2400</samples>
-              <resolution>1.0</resolution>
-              <min_angle>-3.1415926</min_angle>
-              <max_angle>3.1415926</max_angle>
-            </horizontal>
-            <vertical>
-              <samples>32</samples>
-              <resolution>1.0</resolution>
-              <min_angle>-0.261799</min_angle>
-              <max_angle>0.261799</max_angle>
-            </vertical>
-          </scan>
-          <range>
-            <min>0.3</min>
-            <max>40</max>
-            <resolution>0.02</resolution>
-          </range>
-          <noise>
-            <type>gaussian</type>
-            <mean>0.0</mean>
-            <stddev>0.025</stddev>
-          </noise>
-        </lidar>
+      <update_rate>10</update_rate>
+      <visualize>true</visualize>
+      <always_on>true</always_on>
+      <frame_id>laser_link</frame_id>
+      <ignition_frame_id>laser_link</ignition_frame_id>
+      <topic>/lidar_3d</topic>
+      <lidar>
+        <scan>
+          <horizontal>
+            <samples>3600</samples>
+            <resolution>0.1</resolution>
+            <min_angle>-3.1415926</min_angle>
+            <max_angle>3.1415926</max_angle>
+          </horizontal>
+          <vertical>
+            <samples>32</samples>
+            <resolution>0.5</resolution>
+            <min_angle>-0.261799</min_angle>
+            <max_angle>0.261799</max_angle>
+          </vertical>
+        </scan>
+        <range>
+          <min>0.5</min>
+          <max>30.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </lidar>
     </sensor>
     <sensor type="gpu_lidar" name="generic_twold_lidar_sensor">
       <topic>/scan</topic>
@@ -403,34 +394,34 @@
   </gazebo>
 
   <joint name="wheel_front_right_joint" type="continuous">
-    <origin xyz="${-wheelbase / 2.0} ${track_width / 2.0} ${wheel_z}" rpy="${pi / 2.0} 0.0 0.0"/>
+    <origin xyz="${wheelbase / 2.0} ${track_width / 2.0} ${wheel_z}" rpy="${pi / 2.0} 0.0 0.0"/>
     <parent link="base_link"/>
     <child link="wheel_front_right"/>
-    <axis xyz="0.0 0.0 1.0"/>
+    <axis xyz="0.0 0.0 -1.0"/>
   </joint>
 
 
   <joint name="wheel_front_left_joint" type="continuous">
-    <origin xyz="${-wheelbase / 2.0} ${-track_width / 2.0} ${wheel_z}" rpy="${pi / 2.0} 0.0 0.0"/>
+    <origin xyz="${wheelbase / 2.0} ${-track_width / 2.0} ${wheel_z}" rpy="${pi / 2.0} 0.0 0.0"/>
     <parent link="base_link"/>
     <child link="wheel_front_left"/>
-    <axis xyz="0.0 0.0 1.0"/>
+    <axis xyz="0.0 0.0 -1.0"/>
 
   </joint>
 
   <joint name="wheel_back_right_joint" type="continuous">
-    <origin xyz="${wheelbase / 2.0} ${track_width / 2.0} ${wheel_z}" rpy="${pi / 2.0} 0.0 0.0"/>
+    <origin xyz="${-wheelbase / 2.0} ${track_width / 2.0} ${wheel_z}" rpy="${pi / 2.0} 0.0 0.0"/>
     <parent link="base_link"/>
     <child link="wheel_back_right"/>
-    <axis xyz="0.0 0.0 1.0"/>
+    <axis xyz="0.0 0.0 -1.0"/>
 
   </joint>
 
   <joint name="wheel_back_left_joint" type="continuous">
-    <origin xyz="${wheelbase / 2.0} ${-track_width / 2.0} ${wheel_z}" rpy="${pi / 2.0} 0.0 0.0"/>
+    <origin xyz="${-wheelbase / 2.0} ${-track_width / 2.0} ${wheel_z}" rpy="${pi / 2.0} 0.0 0.0"/>
     <parent link="base_link"/>
     <child link="wheel_back_left"/>
-    <axis xyz="0.0 0.0 1.0"/>
+    <axis xyz="0.0 0.0 -1.0"/>
 
   </joint>
 
@@ -441,7 +432,7 @@
 
     <gazebo>
         <plugin filename="ign_ros2_control-system" name="ign_ros2_control::IgnitionROS2ControlPlugin">
-            <parameters>$(find bot_controller)/config/bot_controller.yaml</parameters>
+            <parameters>$(arg controller_params_file)</parameters>
         </plugin>
         <plugin filename="libignition-gazebo-imu-system.so" name="ignition::gazebo::systems::Imu">
           <initial_orientation_as_reference>false</initial_orientation_as_reference>

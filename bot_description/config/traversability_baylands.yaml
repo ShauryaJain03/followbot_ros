@@ -1,0 +1,14 @@
+traversability_node:
+  ros__parameters:
+    pc_topic: /velodyne_points
+    resolution: 0.30
+    half_size: 15.0
+    security_distance: 0.15
+    max_slope: 0.85 #radians
+    ground_clearance: 0.35
+    robot_height: 0.85
+    robot_width: 1.04
+    robot_length: 1.25
+    draw_isodistance_each: 1.0
+    frame_id: base_link
+    global_mapping: false

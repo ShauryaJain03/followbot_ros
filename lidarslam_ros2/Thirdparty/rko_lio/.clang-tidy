@@ -1,0 +1,8 @@
+Checks: "*, -abseil-*, -altera-*, -android-*, -fuchsia-*, -google-*, -llvm*, -modernize-use-trailing-return-type, -zircon-*, -readability-else-after-return, -readability-static-accessed-through-instance, -readability-avoid-const-params-in-decls, -cppcoreguidelines-non-private-member-variables-in-classes, -misc-non-private-member-variables-in-classes,-readability-magic-numbers, -cppcoreguidelines-avoid-magic-numbers, -readability-identifier-length, -modernize-use-nodiscard, -modernize-use-ranges,-boost-use-ranges"
+CheckOptions:
+  - key: readability-function-cognitive-complexity.IgnoreMacros
+    value: 'true'
+WarningsAsErrors: "*"
+HeaderFilterRegex: "."
+FormatStyle: "file"
+# copied from https://github.com/cpp-best-practices/cmake_template/blob/main/.clang-tidy

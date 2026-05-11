@@ -1,0 +1,295 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+  pull_request:
+    branches:
+      - develop
+      - main
+  schedule:
+    - cron: '0 18 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docs-and-release-metadata:
+    name: docs and release metadata
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Install Python test dependency
+        shell: bash
+        run: |
+          python3 -m pip install --upgrade pytest
+
+      - name: Validate docs entrypoints
+        shell: bash
+        run: |
+          python3 -m pytest graph_based_slam/test/test_docs_entrypoints.py -q
+
+      - name: Validate public shell entrypoints
+        shell: bash
+        run: |
+          bash -n scripts/run_autoware_quickstart.sh
+          bash -n scripts/download_ntu_viral_tnp01.sh
+          bash -n scripts/run_default_ci_checks.sh
+          bash -n scripts/run_release_readiness_checks.sh
+          bash -n scripts/run_rko_lio_graph_autoware_dogfood.sh
+          bash -n scripts/run_graph_slam_pointcloud_map_in_autoware.sh
+          bash -n scripts/prepare_velodyne_pointcloud_overlay.sh
+          bash -n scripts/run_open_data_applanix_velodyne_gnss_smoke.sh
+          bash -n scripts/run_awsim_autoware_demo.sh
+          bash -n scripts/run_awsim_selfmade_map_demo.sh
+          bash -n scripts/test_awsim_setup.sh
+          bash -n scripts/download_autoware_artifacts.sh
+          bash -n scripts/prepare_autoware_map_from_graph_slam.sh
+          bash -n scripts/record_screen.sh
+
+      - name: Test simple_lanelet2_generator
+        shell: bash
+        run: |
+          python3 -m pip install --upgrade numpy scipy
+          python3 -c "
+          import tempfile, os, sys
+          sys.path.insert(0, 'scripts')
+          from simple_lanelet2_generator import read_tum, smooth_and_resample, offset_boundaries, build_osm, write_osm
+          import numpy as np
+          from pathlib import Path
+
+          # Generate synthetic TUM trajectory (circle)
+          t = np.linspace(0, 2*np.pi, 50)
+          r = 50.0
+          tum = np.column_stack([t, r*np.cos(t), r*np.sin(t), np.zeros(50), np.zeros(50), np.zeros(50), np.zeros(50), np.ones(50)])
+          tum_path = Path(tempfile.mktemp(suffix='.tum'))
+          np.savetxt(str(tum_path), tum)
+
+          data = read_tum(tum_path)
+          assert data.shape == (50, 8), f'Expected (50,8), got {data.shape}'
+
+          xyz = smooth_and_resample(data[:, 1:4], 2.0, 0.0)
+          assert len(xyz) > 10, f'Expected >10 points, got {len(xyz)}'
+
+          left, right = offset_boundaries(xyz, 1.75)
+          assert left.shape == right.shape == xyz.shape
+
+          osm, n_lanelets = build_osm(left, right, 35.0, 139.0, 10.0, segment_length=25)
+          assert n_lanelets >= 1
+
+          out = Path(tempfile.mktemp(suffix='.osm'))
+          write_osm(osm, out)
+          assert out.exists()
+
+          import xml.etree.ElementTree as ET
+          tree = ET.parse(str(out))
+          nodes = tree.getroot().findall('node')
+          ways = tree.getroot().findall('way')
+          rels = tree.getroot().findall('relation')
+          assert len(nodes) > 0, 'No nodes'
+          assert len(ways) == n_lanelets * 2, f'Expected {n_lanelets*2} ways, got {len(ways)}'
+          assert len(rels) == n_lanelets, f'Expected {n_lanelets} relations, got {len(rels)}'
+
+          # Verify boundary node sharing between segments
+          if n_lanelets > 1:
+              w0_nds = [nd.get('ref') for nd in ways[0].findall('nd')]
+              w2_nds = [nd.get('ref') for nd in ways[2].findall('nd')]
+              assert w0_nds[-1] == w2_nds[0], 'Boundary nodes not shared'
+
+          os.unlink(str(tum_path))
+          os.unlink(str(out))
+          print('All lanelet2 generator tests passed')
+          "
+
+  default-workflow:
+    name: ${{ matrix.ros_distro }} default workflow
+    needs: docs-and-release-metadata
+    runs-on: ${{ matrix.runs_on }}
+    container: ${{ matrix.container }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - ros_distro: humble
+            runs_on: ubuntu-22.04
+            container: ros:humble-ros-core
+          - ros_distro: jazzy
+            runs_on: ubuntu-24.04
+            container: ros:jazzy-ros-core
+
+    steps:
+      - name: Install system dependencies
+        shell: bash
+        run: |
+          apt-get update
+          apt-get install -y git python3-rosdep python3-colcon-common-extensions
+
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Initialize rosdep
+        shell: bash
+        run: |
+          if [[ ! -e /etc/ros/rosdep/sources.list.d/20-default.list ]]; then
+            rosdep init
+          fi
+          rosdep update --rosdistro "${{ matrix.ros_distro }}"
+
+      - name: Install default workflow dependencies
+        shell: bash
+        run: |
+          source "/opt/ros/${{ matrix.ros_distro }}/setup.bash"
+          rosdep install -r -y \
+            --from-paths \
+              lidarslam \
+              lidarslam_msgs \
+              scanmatcher \
+              graph_based_slam \
+              Thirdparty/ndt_omp_ros2 \
+              Thirdparty/rko_lio \
+            --ignore-src \
+            --rosdistro "${{ matrix.ros_distro }}"
+
+      - name: Build and test default workflow
+        shell: bash
+        run: |
+          source "/opt/ros/${{ matrix.ros_distro }}/setup.bash"
+          bash scripts/run_default_ci_checks.sh
+
+      - name: Publish test results
+        if: always()
+        shell: bash
+        run: |
+          source "/opt/ros/${{ matrix.ros_distro }}/setup.bash"
+          if [[ -f install/setup.bash ]]; then
+            # shellcheck source=/dev/null
+            source install/setup.bash
+          fi
+          colcon test-result --verbose
+
+  release-readiness:
+    name: release readiness
+    needs:
+      - docs-and-release-metadata
+      - default-workflow
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Generate synthetic benchmark fixture
+        shell: bash
+        run: |
+          python3 scripts/generate_sample_benchmark_metrics.py \
+            --root ci_benchmark_fixture \
+            --profile passing
+
+      - name: Run release-readiness gate
+        shell: bash
+        run: |
+          bash scripts/run_release_readiness_checks.sh \
+            --skip-default-ci \
+            --benchmark-root ci_benchmark_fixture \
+            --out-dir output/ci_release_readiness \
+            --ape-threshold 0.10
+
+      - name: Upload release-readiness artifacts
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: release-readiness
+          path: |
+            output/ci_release_readiness/benchmark_summary.md
+            output/ci_release_readiness/benchmark_summary.csv
+            output/ci_release_readiness/benchmark_report.html
+            ci_benchmark_fixture
+
+      - name: Publish release-readiness summary
+        if: always()
+        shell: bash
+        run: |
+          if [[ -f output/ci_release_readiness/benchmark_summary.md ]]; then
+            {
+              echo "## Release readiness"
+              echo
+              echo '```md'
+              sed -n '1,80p' output/ci_release_readiness/benchmark_summary.md
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  release-readiness-threshold-guard:
+    name: release readiness threshold guard
+    needs:
+      - docs-and-release-metadata
+      - default-workflow
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Generate failing synthetic benchmark fixture
+        shell: bash
+        run: |
+          python3 scripts/generate_sample_benchmark_metrics.py \
+            --root ci_benchmark_fixture_fail \
+            --profile failing
+
+      - name: Assert release-readiness gate rejects bad benchmarks
+        shell: bash
+        run: |
+          set +e
+          bash scripts/run_release_readiness_checks.sh \
+            --skip-default-ci \
+            --benchmark-root ci_benchmark_fixture_fail \
+            --out-dir output/ci_release_readiness_fail \
+            --ape-threshold 0.10
+          rc=$?
+          set -e
+          if [[ "${rc}" -ne 2 ]]; then
+            echo "expected release gate to exit 2, got ${rc}" >&2
+            exit 1
+          fi
+
+      - name: Upload threshold-guard artifacts
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: release-readiness-threshold-guard
+          path: |
+            output/ci_release_readiness_fail/benchmark_summary.md
+            output/ci_release_readiness_fail/benchmark_summary.csv
+            ci_benchmark_fixture_fail
+
+      - name: Publish threshold-guard summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## Release readiness threshold guard"
+            echo
+            echo "- expected exit code: \`2\`"
+            echo "- gate behavior: threshold violation must fail the workflow step"
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [[ -f output/ci_release_readiness_fail/benchmark_summary.md ]]; then
+            {
+              echo
+              echo '```md'
+              sed -n '1,80p' output/ci_release_readiness_fail/benchmark_summary.md
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi

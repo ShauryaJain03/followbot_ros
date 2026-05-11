@@ -4,7 +4,7 @@ traversability_analyzer:
     grid_topic: /traversability_grid
     markers_topic: /traversability_markers
     frame_id: map
-    base_frame_id: base_footprint
+    base_frame_id: base_link
     robot_pose_topic: /robot_pose_gt
     grid_resolution: 0.25
     grid_width_m: 30.0

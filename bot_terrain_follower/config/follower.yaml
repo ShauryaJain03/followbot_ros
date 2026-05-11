@@ -17,15 +17,19 @@ human_pose_publisher:
 
 naive_follower:
   ros__parameters:
-    human_pose_topic: /human_pose
-    robot_pose_topic: /robot_pose_gt
+    use_sim_time: true
     cmd_vel_topic: /bot_controller/cmd_vel_unstamped
+    base_frame: base_link
+    target_frame: detected_human
     control_rate: 20.0
-    target_distance: 2.5
-    kp_linear: 0.6
+    follow_distance: 2.5
+    distance_tolerance: 0.3
+    target_timeout: 0.75
+    kp_linear: 0.35
     kp_angular: 1.8
-    max_linear_speed: 0.7
-    max_angular_speed: 1.2
+    max_linear_speed: 0.25
+    max_angular_speed: 0.7
+    max_heading_for_forward: 1.0
 
 capability_aware_follower:
   ros__parameters:

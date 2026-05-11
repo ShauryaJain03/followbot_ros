@@ -1,0 +1,3 @@
+extrinsic_imu2base_quat_xyzw_xyz: [0.00260242, -0.000189964, 0.714824, -0.6993, 0.00151982, -0.0046825, -0.0775784]
+extrinsic_lidar2base_quat_xyzw_xyz: [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0]
+initialization_phase: false

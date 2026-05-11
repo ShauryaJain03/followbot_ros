@@ -142,6 +142,8 @@ public:
         }
         geometry_msgs::msg::TransformStamped ts;
         tf2::convert(tCur, ts);
+        ts.header.stamp = odomMsg->header.stamp;
+        ts.header.frame_id = odometryFrame;
         ts.child_frame_id = baselinkFrame;
         tfBroadcaster->sendTransform(ts);
 
@@ -245,7 +247,7 @@ public:
 
         pubImuOdometry = create_publisher<nav_msgs::msg::Odometry>(odomTopic+"_incremental", qos_imu);
 
-        std::shared_ptr<gtsam::PreintegrationParams> p  = gtsam::PreintegrationParams::MakeSharedU(imuGravity);
+        boost::shared_ptr<gtsam::PreintegrationParams> p  = gtsam::PreintegrationParams::MakeSharedU(imuGravity);
         p->accelerometerCovariance  = gtsam::Matrix33::Identity(3,3) * pow(imuAccNoise, 2); // acc white noise in continuous
         p->gyroscopeCovariance      = gtsam::Matrix33::Identity(3,3) * pow(imuGyrNoise, 2); // gyro white noise in continuous
         p->integrationCovariance    = gtsam::Matrix33::Identity(3,3) * pow(1e-4, 2); // error committed in integrating position from velocities

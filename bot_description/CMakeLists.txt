@@ -7,15 +7,32 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
-# uncomment the following section in order to fill in
-# further dependencies manually.
-# find_package(<dependency> REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(tf2_sensor_msgs REQUIRED)
+
+add_executable(pointcloud_transform src/pointcloud_transform.cpp)
+ament_target_dependencies(
+  pointcloud_transform
+  geometry_msgs
+  rclcpp
+  sensor_msgs
+  tf2_ros
+  tf2_sensor_msgs
+)
 
 
 
 install(
   DIRECTORY launch rviz urdf worlds models photos config
   DESTINATION share/${PROJECT_NAME}
+)
+
+install(
+  TARGETS pointcloud_transform
+  DESTINATION lib/${PROJECT_NAME}
 )
 
 

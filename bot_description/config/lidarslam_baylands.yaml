@@ -1,0 +1,78 @@
+  scan_matcher:
+  ros__parameters:
+    global_frame_id: "map"
+    robot_frame_id: "base_link"
+    odom_frame_id: "odom"
+
+    registration_method: "NDT"
+    ndt_resolution: 2.0          # Coarser for Gazebo stability
+    ndt_num_threads: 4           # Use CPU cores
+    gicp_corr_dist_threshold: 2.0 # Tighter outlier rejection
+
+    trans_for_mapupdate: 1.0
+    vg_size_for_input: 0.3       # Less aggressive downsampling
+    vg_size_for_map: 0.2         # Stable global map
+    min_points_for_scan: 100     # Accept more valid scans
+
+    use_min_max_filter: true
+    scan_min_range: 0.5
+    scan_max_range: 30.0         # Match your LiDAR capability
+
+    # Gazebo timing
+    scan_period: 0.108
+    map_publish_period: 5.0
+    num_targeted_cloud: 20
+    num_recovery_targeted_cloud: 36
+
+    set_initial_pose: true
+    initial_pose_x: 0.0
+    initial_pose_y: 0.0
+    initial_pose_z: 0.0
+    initial_pose_qx: 0.0
+    initial_pose_qy: 0.0
+    initial_pose_qz: 0.0
+    initial_pose_qw: 1.0
+
+    publish_tf: true
+    use_odom: true              # Pure LiDAR - disable noisy sim odom
+    use_imu: false
+    debug_flag: true             # Monitor rejection reasons
+
+    diagnostic_warn_trans_jump: 2.0
+    diagnostic_warn_yaw_jump_deg: 15.0
+    reject_nonconverged_pose_update: false  # Accept all converged
+    reject_warmup_scans: 10      # Faster map building
+    reject_fitness_score: 2.0    # Much looser acceptance
+    reject_fitness_ratio: 2.0    # Accept your fitness=0.53 cases
+    reject_fitness_only_ratio: 0.0
+    reject_fitness_streak_ratio: 0.0
+    reject_hard_fitness_ratio: 0.0
+    reject_trans_jump: 1.5       # Handle Gazebo jumps
+    reject_trans_jump_ratio: 0.0
+    async_map_update: true
+    async_map_update_warmup_submaps: 1
+
+graph_based_slam:
+  ros__parameters:
+    global_frame_id: "map"
+
+    registration_method: "NDT"
+    ndt_resolution: 2.0          # Match scan matcher
+    ndt_num_threads: 4
+    voxel_leaf_size: 0.5         # Medium coarseness
+
+    loop_detection_period: 3000
+    threshold_loop_closure_score: 0.7  # Stricter, fewer false loops
+    distance_loop_closure: 30.0  # Wider loop search
+    range_of_searching_loop_closure: 20.0
+    search_submap_num: 4
+    max_loop_candidate_count: 3
+    loop_edge_dedup_index_window: 8
+    loop_max_translation_delta: 15.0
+    loop_max_rotation_delta_deg: 45.0
+    num_adjacent_pose_cnstraints: 5
+
+    use_save_map_in_loop: false
+    debug_flag: true
+    use_gnss: false
+    use_dynamic_object_filter: false

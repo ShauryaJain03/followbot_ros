@@ -76,10 +76,54 @@ Implementation of a 4 Wheel Differential Drive Human Following robot capable of 
     ros2 launch bot_description navigation_launch.py use_sim_time:=true
     
     ```
+
+12. start container and mount the custom params file
+```sh
+docker run --rm -it \
+  --name liosam-humble-jammy-container \
+  --net=host \
+  --ipc=host \
+  --shm-size=2g \
+  --privileged \
+  -e DISPLAY=$DISPLAY \
+  -e QT_X11_NO_MITSHM=1 \
+  -e ROS_LOCALHOST_ONLY=0 \
+  -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
+  -v /home/shaurya/followbot_ws/src/followbot_ros/bot_description/config/lio_sam_baylands_params.yaml:/root/lio_sam_baylands_params.yaml:ro \
+  liosam-humble-jammy:latest \
+  bash
+```
+
 12. Launch LIO SAM
-    ```sh
-    ros2 launch lio_sam run.launch.py
+    ```sh 
+   ros2 launch lio_sam run.launch.py params_file:=/root/lio_sam_baylands_params.yaml
     ```
+
+13. run human detector
+    ```sh 
+ros2 launch human_detector human_detector.launch.py   camera_frame_id:=rgbd_camera   horizontal_fov:=1.10   use_sim:=True   pose_landmarker_model_path:=/home/shaurya/models/pose_landmarker_full.task
+
+    ```
+
+14. run detector
+```sh
+source ~/venvs/followbot/bin/activate
+export PYTHONNOUSERSITE=1
+
+python3 -m pip install --upgrade pip
+python3 -m pip install "numpy<2" mediapipe opencv-python
+
+mkdir -p ~/models
+wget -O ~/models/pose_landmarker_full.task \
+  https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/latest/pose_landmarker_full.task
+
+ros2 launch human_detector human_detector.launch.py     use_sim:=False     camera_frame_id:=rgbd_camera     horizontal_fov:=1.10     pose_landmarker_model_path:=/home/shaurya/models/pose_landmarker_full.task     rgb_image_topic:=/camera/image     depth_image_topic:=/camera/depth_image     camera_info_topic:=/camera/camera_info
+```
+
+16. naive follower
+```sh
+ros2 run bot_terrain_follower naive_follower --ros-args --params-file /home/shaurya/followbot_ws/src/followbot_ros/bot_terrain_follower/config/follower.yaml
+```
 
 
 ### Demo
@@ -100,6 +144,24 @@ Shaurya Jain - Reach me at jainshaurya.sj@gmail.com
   title        = {Terrain Aware Payload Delivery Robot},
   author       = {Shaurya Jain},
   year         = {2025},
-  url          = {https://github.com/ShauryaJain03/armybot_diff_drive},
+  url          = {https://github.com/ShauryaJain03/followbot_ros},
 }
 
+
+
+
+docker run --rm -it \
+  --name liosam-humble-jammy-container \
+  --net=host \
+  --ipc=host \
+  --shm-size=2g \
+  --privileged \
+  -e DISPLAY=$DISPLAY \
+  -e QT_X11_NO_MITSHM=1 \
+  -e ROS_LOCALHOST_ONLY=0 \
+  -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
+  -v /home/shaurya/followbot_ws/src/followbot_ros/bot_description/config/lio_sam_baylands_params.yaml:/root/lio_sam_baylands_params.yaml:ro \
+  liosam-humble-jammy:latest \
+  bash
+
+ros2 launch lio_sam run.launch.py params_file:=/root/lio_sam_baylands_params.yaml

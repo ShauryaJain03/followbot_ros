@@ -2,6 +2,7 @@
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Image
+from sensor_msgs.msg import CameraInfo
 from apriltag_msgs.msg import AprilTagDetectionArray
 from geometry_msgs.msg import Twist
 from std_msgs.msg import String
@@ -69,14 +70,20 @@ class ImageSubscriber(Node):
         self.cmd_vel_pub = self.create_publisher(Twist, '/bot_controller/cmd_vel_unstamped', 10)
 
         self.image_topic = '/camera/image_raw'      
+        self.camera_info_topic = '/camera/camera_info'
         self.viz_topic = '/apriltag_detections/detection'
         self.image_sub = self.create_subscription(Image, self.image_topic, self.image_callback, 10)
+        self.camera_info_sub = self.create_subscription(CameraInfo, self.camera_info_topic, self.camera_info_callback, 10)
         self.viz_pub = self.create_publisher(Image, self.viz_topic, 10)
 
         self.target_tag_id = 0
-        self.target_area = 22000  
-        
-        self.image_center_x = 320  
+        self.base_target_area = 22000
+        self.base_image_width = 640
+        self.base_image_height = 480
+        self.target_area = self.base_target_area
+        self.image_width = self.base_image_width
+        self.image_height = self.base_image_height
+        self.image_center_x = self.image_width / 2.0
 
         self.angular_pid = PIDController(
             kp=0.005,   
@@ -107,6 +114,19 @@ class ImageSubscriber(Node):
         self.get_logger().info('Controllers initialized')
         self.get_logger().info(f'Subscribed image topic: {self.image_topic}')
         self.get_logger().info(f'Publishing annotated image on: {self.viz_topic}')
+
+    def camera_info_callback(self, msg: CameraInfo):
+        if msg.width and msg.height:
+            if msg.width != self.image_width or msg.height != self.image_height:
+                self.image_width = msg.width
+                self.image_height = msg.height
+                self.image_center_x = self.image_width / 2.0
+                scale = (self.image_width * self.image_height) / float(self.base_image_width * self.base_image_height)
+                self.target_area = int(self.base_target_area * scale)
+                self.get_logger().info(
+                    f'Camera info received: {self.image_width}x{self.image_height}, '
+                    f'center_x={self.image_center_x:.1f}, target_area={self.target_area}'
+                )
         
     def calculate_tag_area(self, corners):
         if len(corners) != 4:
@@ -203,7 +223,7 @@ class ImageSubscriber(Node):
     def publish_annotated_image(self, detection, header):
         with self.image_lock:
             if self.latest_image_cv is None:
-                canvas = np.zeros((480, 640, 3), dtype=np.uint8)
+                canvas = np.zeros((self.image_height, self.image_width, 3), dtype=np.uint8)
             else:
                 canvas = self.latest_image_cv.copy()
 
