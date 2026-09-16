@@ -4,11 +4,9 @@ Implementation of a 4 Wheel Differential Drive Human Following robot capable of 
 
 ### Key Features:
 * ROS2 based software stack.
-* Human Following using Apriltags (tag36h11 with id=0 for following, use id=1 for other purposes)
-* Mapless and Map based Autonomous Navigation (2D LiDAR Based).
-* GPS waypoint navigation
+* Terrain-aware human following using RGB-D human localization.
+* Map-based autonomous navigation using LiDAR-inertial mapping.
 * LIO SAM based environment mapping
-* Autonomous Return using GPS
 
 ### Features Under Development
 * Behaviour Tree based model for managing missions
@@ -46,30 +44,26 @@ Implementation of a 4 Wheel Differential Drive Human Following robot capable of 
    ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r /cmd_vel:=/bot_controller/cmd_vel_unstamped
 
    ```
-6. Run Apriltag detection and Human Following
-   ```sh
-   ros2 launch apriltag_navigation apriltag_navigation.launch.py
-   ```
-7. SLAM with slam_toolbox
+6. SLAM with slam_toolbox
    ```sh
    ros2 launch slam_toolbox online_async_launch.py slam_params_file:={path to yaml file} use_sim_time:=true
    ```
-8. Switch from Mapping to Localization - make change in the params file
+7. Switch from Mapping to Localization - make change in the params file
    ```sh
    ros2 launch slam_toolbox online_async_launch.py slam_params_file:={path to yaml file} use_sim_time:=true
    ```
-9. Control the Robot with Twist Mux
+8. Control the Robot with Twist Mux
    ```sh
    ros2 run twist_mux twist_mux --ros-args --params-file {path to yaml file} -r cmd_vel_out:=bot_controller/cmd_vel_unstamped
 
    ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r /cmd_vel:=/cmd_vel_joy
 
    ```
-10. Navigation Using Nav2
+9. Navigation Using Nav2
       ```sh
       ros2 launch bot_description navigation_launch.py use_sim_time:=true
       ```
-11. For Mapless Navigation - Launch Twist Mux node first and then proceed with following scripts
+10. For Mapless Navigation - Launch Twist Mux node first and then proceed with following scripts
     ```sh
     ros2 launch slam_toolbox online_async_launch.py use_sim_time:=true
    
@@ -128,7 +122,6 @@ ros2 run bot_terrain_follower naive_follower --ros-args --params-file /home/shau
 ### Demo
 [![LIO SAM Implementation](https://github.com/user-attachments/assets/3d78732c-3963-4808-b002-726828a6adb9)](https://www.youtube.com/watch?v=XTHApWPIjQc)
 <br></br>
-[![Apriltag based following and autonomous return using GPS](https://github.com/user-attachments/assets/813798aa-223b-416c-85cf-4c03ae31cf44)](https://www.youtube.com/watch?v=03kYAswBATE)
 
 <!-- CONTACT -->
 ### Contact
@@ -137,5 +130,4 @@ Shaurya Jain - Reach me at jainshaurya.sj@gmail.com
 
 
 ### Citation
-
 
