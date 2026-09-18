@@ -1,0 +1,44 @@
+Panels:
+  - Class: rviz_common/Displays
+    Name: Displays
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Class: rviz_default_plugins/Grid
+      Name: Ground grid
+      Enabled: true
+      Cell Size: 1
+      Plane: XY
+      Reference Frame: base_link
+    - Class: rviz_default_plugins/PointCloud2
+      Name: LiDAR cloud
+      Enabled: true
+      Topic:
+        Value: /points
+      Size (Pixels): 2
+      Style: Flat Squares
+      Color Transformer: AxisColor
+      Axis: Z
+    - Class: rviz_default_plugins/Map
+      Name: Fused terrain costmap
+      Enabled: true
+      Topic:
+        Value: /terrain/costmap
+      Alpha: 0.65
+      Color Scheme: costmap
+    - Class: rviz_default_plugins/Map
+      Name: Local terrain grid
+      Enabled: false
+      Topic:
+        Value: /terrain/local_grid
+      Alpha: 0.55
+      Color Scheme: costmap
+    - Class: rviz_default_plugins/MarkerArray
+      Name: Terrain classes
+      Enabled: true
+      Topic:
+        Value: /terrain/markers
+  Global Options:
+    Fixed Frame: base_link
+    Background Color: 48; 48; 48
+    Frame Rate: 30

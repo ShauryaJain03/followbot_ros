@@ -31,17 +31,6 @@ naive_follower:
     max_angular_speed: 0.7
     max_heading_for_forward: 1.0
 
-capability_aware_follower:
-  ros__parameters:
-    human_pose_topic: /human_pose
-    robot_pose_topic: /robot_pose_gt
-    traversability_grid_topic: /traversability_grid
-    planned_path_topic: /terrain_follower/path
-    cmd_vel_topic: /bot_controller/cmd_vel_unstamped
-    control_rate: 10.0
-    target_distance: 3.0
-    max_rejoin_distance: 6.0
-
 demo_metrics_logger:
   ros__parameters:
     human_pose_topic: /human_pose

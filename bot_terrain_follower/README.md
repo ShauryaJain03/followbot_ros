@@ -1,24 +1,23 @@
 # bot_terrain_follower
 
-ROS 2 package for the terrain-capability-aware human-following proof of concept.
+ROS 2 package for a self-contained terrain-capability-aware human-following proof of concept.
 
 The demo compares two behaviors in the Baylands rough-terrain world:
 
 - Baseline: direct human following. The robot tries to follow the human across stairs and should fail or lose the target.
-- POC: terrain-aware following. The robot classifies stairs as infeasible, plans around them, rejoins the human, and keeps distance bounded.
+- Terrain mapping: live LiDAR produces a rolling local grid; registered clouds accumulate into a map-frame terrain grid.
 
 ## Package Layout
 
 - `human_pose_publisher.py`: temporary deterministic human target publisher for isolated tests.
 - `robot_ground_truth_publisher.py`: extracts the robot pose from Gazebo pose info and publishes `/robot_pose_gt`.
 - `naive_follower.py`: direct baseline follower that ignores terrain.
-- `traversability_analyzer.py`: 3D-lidar traversability grid builder and RViz marker publisher.
-- `capability_aware_follower.py`: terrain-aware follower scaffold.
+- `traversability_analyzer.py`: 2.5D elevation-grid terrain mapper with slope, step, roughness, and obstacle classification.
 - `demo_metrics_logger.py`: reports current and maximum robot-human distance.
 - `config/follower.yaml`: follower and metric parameters.
 - `config/traversability.yaml`: terrain grid and capability thresholds.
 - `launch/baseline_follow_demo.launch.py`: launches Baylands, direct follower, and metrics.
-- `launch/capability_follow_demo.launch.py`: launches Baylands, traversability analyzer, terrain-aware follower, and metrics.
+- `launch/terrain_mapping_demo.launch.py`: launches Baylands, the terrain mapper, and RViz.
 
 ## Build
 
@@ -37,10 +36,10 @@ Baseline:
 ros2 launch bot_terrain_follower baseline_follow_demo.launch.py world_name:=baylands
 ```
 
-Capability-aware POC:
+Terrain-map visualization:
 
 ```sh
-ros2 launch bot_terrain_follower capability_follow_demo.launch.py world_name:=baylands
+ros2 launch bot_terrain_follower terrain_mapping_demo.launch.py world_name:=baylands
 ```
 
 ## Topics
@@ -50,14 +49,16 @@ ros2 launch bot_terrain_follower capability_follow_demo.launch.py world_name:=ba
 - `/robot_pose_gt` (`geometry_msgs/PoseStamped`): robot ground truth pose from Gazebo.
 - `/bot_controller/cmd_vel_unstamped` (`geometry_msgs/Twist`): velocity command.
 - `/points` (`sensor_msgs/PointCloud2`): 3D lidar point cloud.
-- `/traversability_grid` (`nav_msgs/OccupancyGrid`): terrain feasibility grid.
-- `/terrain_follower/path` (`nav_msgs/Path`): planned terrain-aware rejoin path.
-- `/traversability_markers` (`visualization_msgs/MarkerArray`): RViz terrain visualization.
+- `/terrain/local_grid` (`nav_msgs/OccupancyGrid`): rolling, `base_link`-frame terrain grid from the current cloud.
+- `/terrain/global_grid` (`nav_msgs/OccupancyGrid`): map-frame grid accumulated from registered LiDAR clouds.
+- `/terrain/costmap` (`nav_msgs/OccupancyGrid`): planner-facing fused map-frame terrain grid.
+- `/terrain/markers` (`visualization_msgs/MarkerArray`): terrain classes for RViz (green/free, yellow/orange/costly, red/lethal).
 
 ## Next Implementation Steps
 
-1. Verify `/human_pose` and `/human_path` align with the visible Baylands actor.
-2. Refine `traversability_analyzer` into a planner-ready local map with better cell scoring and obstacle inflation.
-3. Implement A* in `capability_aware_follower` over `/traversability_grid`.
-4. Add RViz markers for infeasible stairs, selected alternate path, and rejoin goal.
-5. Run the same actor path with baseline and POC launch files and compare maximum human distance plus stuck time.
+1. Verify the LiDAR cloud has a valid `map <- laser_link` transform from LIO-SAM before expecting the global grid.
+   The RViz profile defaults to `base_link`, so the live local grid remains visible before LIO-SAM is started.
+2. Tune slope, step, roughness, and obstacle thresholds against a recorded Baylands route.
+3. Add terrain costmap inflation using the actual robot footprint.
+4. Feed `/terrain/costmap` to the Smac Hybrid-A* planner.
+5. Add a follow-goal manager that chooses a feasible slot near, rather than at, the human.

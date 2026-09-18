@@ -16,7 +16,6 @@
   <exec_depend>ros2launch</exec_depend>
   <exec_depend>tf2_ros</exec_depend>
   <exec_depend>rviz2</exec_depend>
-  <exec_depend>traversability_gridmap</exec_depend>
   <exec_depend>bot_terrain_follower</exec_depend>
   <exec_depend>human_detector</exec_depend>
 

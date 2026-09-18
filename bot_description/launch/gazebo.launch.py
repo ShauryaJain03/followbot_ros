@@ -84,16 +84,6 @@ def generate_launch_description():
         }],
     )
 
-    joint_state_pub = Node(
-        package="joint_state_publisher",
-        executable="joint_state_publisher",
-        name="joint_state_publisher",
-        output="screen",
-        parameters=[{
-            "use_sim_time": use_sim_time,
-        }],
-    )
-
     actor_baylands_world = os.path.join(
         actor_plugin_description, "config", "worlds", "baylands.world"
     )
@@ -147,7 +137,12 @@ def generate_launch_description():
             "/lidar_3d/points@sensor_msgs/msg/PointCloud2[ignition.msgs.PointCloudPacked",
         ],
         parameters=[{
-            "use_sim_time": use_sim_time,
+            # This process does not need simulated time. More importantly,
+            # keep only the newest clock sample so a delayed Gazebo message
+            # cannot be delivered after a newer simulation timestamp.
+            "qos_overrides./clock.publisher.history": "keep_last",
+            "qos_overrides./clock.publisher.depth": 1,
+            "qos_overrides./clock.publisher.reliability": "reliable",
             "qos_overrides./diff_drive_example.subscriber.reliability": "reliable",
         }],
         remappings=[
@@ -218,7 +213,6 @@ def generate_launch_description():
         use_sim_time_arg,
         gazebo_resource_path,
         robot_state_publisher_node,
-        joint_state_pub,
         gazebo,
         gz_ros2_bridge,
         ros_gz_image_bridge,

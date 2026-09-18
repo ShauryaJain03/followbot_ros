@@ -26,12 +26,28 @@ def generate_launch_description():
     use_ground_truth_odom_arg = DeclareLaunchArgument(
         "use_ground_truth_odom",
         default_value="true",
-        description="Publish local /odom from Gazebo ground truth"
+        description=(
+            "Use the controller configuration for an external odometry "
+            "source; it disables the controller odom TF publisher."
+        ),
+    )
+    publish_ground_truth_odom_arg = DeclareLaunchArgument(
+        "publish_ground_truth_odom",
+        default_value="true",
+        description=(
+            "Publish Gazebo ground truth as /odom and odom -> base_link. "
+            "Set false when LIO-SAM owns odom -> base_link."
+        ),
     )
     use_rviz_arg = DeclareLaunchArgument(
         "use_rviz",
         default_value="true",
         description="Launch RViz for the simulation bringup"
+    )
+    use_sim_time_arg = DeclareLaunchArgument(
+        "use_sim_time",
+        default_value="true",
+        description="Use the Gazebo /clock source for every simulation node.",
     )
 
     model = LaunchConfiguration("model")
@@ -40,7 +56,9 @@ def generate_launch_description():
         "'", world_name, "' == 'baylands'"
     ])
     use_ground_truth_odom = LaunchConfiguration("use_ground_truth_odom")
+    publish_ground_truth_odom = LaunchConfiguration("publish_ground_truth_odom")
     use_rviz = LaunchConfiguration("use_rviz")
+    use_sim_time = LaunchConfiguration("use_sim_time")
     controller_params_file = PythonExpression([
         "'", os.path.join(bot_controller, "config", "bot_controller_ground_truth.yaml"),
         "' if '", use_ground_truth_odom, "' == 'true' else '",
@@ -59,6 +77,7 @@ def generate_launch_description():
             'model': model,
             'world_name': world_name,
             'controller_params_file': controller_params_file,
+            'use_sim_time': use_sim_time,
         }.items()
     )
 
@@ -81,7 +100,7 @@ def generate_launch_description():
         executable='robot_ground_truth_publisher',
         name='robot_ground_truth_publisher',
         parameters=[{
-            'use_sim_time': True,
+            'use_sim_time': use_sim_time,
             'world_pose_topic': world_pose_topic,
             'robot_entity_name': 'bot',
             'pose_topic': '/robot_pose_gt',
@@ -91,7 +110,7 @@ def generate_launch_description():
             'base_frame_id': 'base_link',
             'publish_tf': True,
         }],
-        condition=IfCondition(use_ground_truth_odom),
+        condition=IfCondition(publish_ground_truth_odom),
         output='screen',
     )
 
@@ -118,7 +137,7 @@ def generate_launch_description():
                     default_rviz_config
                 ],
                 parameters=[{
-                    'use_sim_time': True
+                    'use_sim_time': use_sim_time,
                 }],
                 output='screen',
             )
@@ -130,7 +149,9 @@ def generate_launch_description():
         model_arg,
         world_name_arg,
         use_ground_truth_odom_arg,
+        publish_ground_truth_odom_arg,
         use_rviz_arg,
+        use_sim_time_arg,
         gazebo,
         controller,
         ground_truth_odom,

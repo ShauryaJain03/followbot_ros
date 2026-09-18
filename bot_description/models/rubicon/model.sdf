@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sdf version="1.6">
   <model name="sluice">
+    <pose>-4.5 0 -2 0 0 0</pose>
     <static>true</static>
     <link name="base_link">
       <collision name="Cylinder036">
@@ -2503,7 +2504,7 @@
             </texture>
             <uri>materials/textures/Heightmap.png</uri>
             <size>37.5 37.5 5</size>
-            <pos>0 0 0</pos>
+            <pos>-4.5 0 -2</pos>
           </heightmap>
         </geometry>
       </visual>

@@ -1,16 +1,26 @@
 traversability_analyzer:
   ros__parameters:
     pointcloud_topic: /points
-    grid_topic: /traversability_grid
-    markers_topic: /traversability_markers
-    frame_id: map
-    base_frame_id: base_link
-    robot_pose_topic: /robot_pose_gt
-    grid_resolution: 0.25
-    grid_width_m: 30.0
-    grid_height_m: 30.0
+    local_grid_topic: /terrain/local_grid
+    global_grid_topic: /terrain/global_grid
+    costmap_topic: /terrain/costmap
+    markers_topic: /terrain/markers
+    local_frame_id: base_link
+    map_frame_id: map
+    grid_resolution: 0.30
+    local_width_m: 30.0
+    local_height_m: 30.0
+    global_width_m: 100.0
+    global_height_m: 100.0
+    max_sensor_range_m: 15.0
+    min_sensor_height_m: -1.5
+    max_sensor_height_m: 2.0
     slope_limit_deg: 18.0
     step_height_limit_m: 0.16
     roughness_limit_m: 0.08
+    obstacle_height_m: 0.35
     min_points_per_cell: 3
+    max_samples_per_cell: 40
+    terrain_update_rate: 2.0
+    publish_markers: true
     unknown_is_blocked: true
