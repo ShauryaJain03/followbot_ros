@@ -20,8 +20,8 @@ public:
     declare_parameter("target_frame", "laser_link");
     declare_parameter("input_topic", "/points");
     declare_parameter("output_topic", "/velodyne_points");
-    declare_parameter("scan_rate", 9.3);
-    declare_parameter("num_scan_lines", 32);
+    declare_parameter("scan_rate", 5.0);
+    declare_parameter("num_scan_lines", 16);
     declare_parameter("vertical_fov_min", -15.0);
     declare_parameter("vertical_fov_max", 15.0);
 

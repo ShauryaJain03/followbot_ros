@@ -238,7 +238,7 @@
 
   <gazebo reference="laser_link">
     <sensor type="gpu_lidar" name="generic_lidar_sensor">
-      <update_rate>10</update_rate>
+      <update_rate>5</update_rate>
       <visualize>true</visualize>
       <always_on>true</always_on>
       <frame_id>laser_link</frame_id>
@@ -247,13 +247,15 @@
       <lidar>
         <scan>
           <horizontal>
-            <samples>3600</samples>
-            <resolution>0.1</resolution>
+            <!-- 16 x 256 at 5 Hz keeps the simulated cloud stream stable
+                 enough for LIO-SAM on the Baylands world. -->
+            <samples>256</samples>
+            <resolution>1.0</resolution>
             <min_angle>-3.1415926</min_angle>
             <max_angle>3.1415926</max_angle>
           </horizontal>
           <vertical>
-            <samples>32</samples>
+            <samples>16</samples>
             <resolution>0.5</resolution>
             <min_angle>-0.261799</min_angle>
             <max_angle>0.261799</max_angle>
@@ -359,7 +361,7 @@
             <noise type="gaussian">
               <mean>0.0</mean>
               <stddev>1.7e-2</stddev>
-              <bias_mean>0.1</bias_mean>
+              <bias_mean>0.0</bias_mean>
               <bias_stddev>0.001</bias_stddev>
             </noise>
           </x>
@@ -367,7 +369,7 @@
             <noise type="gaussian">
               <mean>0.0</mean>
               <stddev>1.7e-2</stddev>
-              <bias_mean>0.1</bias_mean>
+              <bias_mean>0.0</bias_mean>
               <bias_stddev>0.001</bias_stddev>
             </noise>
           </y>
@@ -375,7 +377,7 @@
             <noise type="gaussian">
               <mean>0.0</mean>
               <stddev>1.7e-2</stddev>
-              <bias_mean>0.1</bias_mean>
+              <bias_mean>0.0</bias_mean>
               <bias_stddev>0.001</bias_stddev>
             </noise>
           </z>

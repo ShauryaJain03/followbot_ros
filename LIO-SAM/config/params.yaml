@@ -25,8 +25,8 @@
 
     # Sensor Settings
     sensor: velodyne                               # lidar sensor type, either 'velodyne', 'ouster' or 'livox'
-    N_SCAN: 32
-    Horizon_SCAN: 3600
+    N_SCAN: 16
+    Horizon_SCAN: 256
     downsampleRate: 1
     lidarMinRange: 0.3
     imuAccNoise: 1.7e-2
@@ -43,7 +43,8 @@
     imuGravity: 9.80511
     imuRPYWeight: 0.01
 
-    extrinsicTrans:  [ 0.0,  0.0,  0.45]         # lidar position in the base_link frame
+    # IMU position in the lidar frame; the IMU/base_link is 0.45 m below lidar.
+    extrinsicTrans:  [ 0.0,  0.0, -0.45]
     extrinsicRot:    [ 1.0,  0.0,  0.0,
                        0.0,  1.0,  0.0,
                        0.0,  0.0,  1.0 ]
@@ -63,8 +64,8 @@
     mappingSurfLeafSize: 0.4                      # default: 0.4 - outdoor, 0.2 - indoor
 
     # robot motion constraint (in case you are using a 2D robot)
-    z_tollerance: 1000.0                          # meters
-    rotation_tollerance: 1000.0                   # radians
+    z_tollerance: 0.15                             # meters
+    rotation_tollerance: 0.20                      # radians
 
     # CPU Params
     numberOfCores: 4                              # number of cores for mapping optimization

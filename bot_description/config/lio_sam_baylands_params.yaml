@@ -19,8 +19,8 @@
     savePCDDirectory: "/tmp/lio_sam/"
 
     sensor: velodyne
-    N_SCAN: 32
-    Horizon_SCAN: 3600
+    N_SCAN: 16
+    Horizon_SCAN: 256
     downsampleRate: 1
     lidarMinRange: 0.3
     imuAccNoise: 1.7e-2
@@ -31,8 +31,9 @@
     imuGravity: 9.80511
     imuRPYWeight: 0.01
 
-    # The lidar is mounted 0.45 m above base_link without additional yaw compensation.
-    extrinsicTrans: [0.0, 0.0, 0.45]
+    # LIO-SAM expects the IMU position expressed in the lidar frame.  The
+    # IMU/base_link is 0.45 m below laser_link, hence the negative Z value.
+    extrinsicTrans: [0.0, 0.0, -0.45]
     extrinsicRot: [1.0, 0.0, 0.0,
                    0.0, 1.0, 0.0,
                    0.0, 0.0, 1.0]
@@ -65,6 +66,11 @@
     odometrySurfLeafSize: 0.4                     # default: 0.4 - outdoor, 0.2 - indoor
     mappingCornerLeafSize: 0.2                    # default: 0.2 - outdoor, 0.1 - indoor
     mappingSurfLeafSize: 0.4                      # default: 0.4 - outdoor, 0.2 - indoor
+
+    # This is a wheeled robot: permit genuine motion on rough terrain, but
+    # reject scan-matching solutions that invent large vertical motion or tilt.
+    z_tollerance: 0.15                             # meters
+    rotation_tollerance: 0.20                      # radians
 
     # CPU Params
     numberOfCores: 4                              # number of cores for mapping optimization
