@@ -247,8 +247,10 @@
       <lidar>
         <scan>
           <horizontal>
-            <!-- 16 x 256 at 5 Hz keeps the simulated cloud stream stable
-                 enough for LIO-SAM on the Baylands world. -->
+            <!-- Keep the validated 16-ring / 256-column / 5 Hz LIO-SAM model.
+                 A vertical resolution of 1.0 is essential: 0.5 effectively
+                 produced only half of the declared vertical returns and left
+                 terrain fits sparse. -->
             <samples>256</samples>
             <resolution>1.0</resolution>
             <min_angle>-3.1415926</min_angle>
@@ -256,7 +258,7 @@
           </horizontal>
           <vertical>
             <samples>16</samples>
-            <resolution>0.5</resolution>
+            <resolution>1.0</resolution>
             <min_angle>-0.261799</min_angle>
             <max_angle>0.261799</max_angle>
           </vertical>

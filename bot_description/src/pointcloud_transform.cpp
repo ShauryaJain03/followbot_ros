@@ -24,6 +24,7 @@ public:
     declare_parameter("num_scan_lines", 16);
     declare_parameter("vertical_fov_min", -15.0);
     declare_parameter("vertical_fov_max", 15.0);
+    declare_parameter("assume_instantaneous_scan", true);
 
     target_frame_ = get_parameter("target_frame").as_string();
     const auto input_topic = get_parameter("input_topic").as_string();
@@ -32,6 +33,7 @@ public:
     num_scan_lines_ = get_parameter("num_scan_lines").as_int();
     vert_fov_min_rad_ = get_parameter("vertical_fov_min").as_double() * M_PI / 180.0;
     vert_fov_max_rad_ = get_parameter("vertical_fov_max").as_double() * M_PI / 180.0;
+    assume_instantaneous_scan_ = get_parameter("assume_instantaneous_scan").as_bool();
     scan_period_ = 1.0 / scan_rate_;
 
     tf_buffer_ = std::make_unique<tf2_ros::Buffer>(get_clock());
@@ -53,12 +55,13 @@ public:
 
     RCLCPP_INFO(
       get_logger(),
-      "PointCloud Transform: %s -> %s (target: %s, scan_rate: %.1f Hz, lines: %d)",
+      "PointCloud Transform: %s -> %s (target: %s, scan_rate: %.1f Hz, lines: %d, instantaneous: %s)",
       input_topic.c_str(),
       output_topic.c_str(),
       target_frame_.c_str(),
       scan_rate_,
-      num_scan_lines_);
+      num_scan_lines_,
+      assume_instantaneous_scan_ ? "true" : "false");
   }
 
 private:
@@ -180,7 +183,12 @@ private:
         *out_ring = compute_ring(px, py, pz);
       }
 
-      *out_time = compute_time_offset(px, py, scan_period_);
+      // Gazebo's GPU lidar publishes an instantaneous raycast snapshot. Giving
+      // points artificial azimuth-based times makes LIO-SAM deskew a scan that
+      // was never acquired over time, which smears registered clouds while the
+      // robot turns. Keep every point at the header time for this sensor.
+      *out_time = assume_instantaneous_scan_ ? 0.0f :
+        compute_time_offset(px, py, scan_period_);
     }
 
     return cloud_out;
@@ -230,6 +238,7 @@ private:
   int num_scan_lines_;
   double vert_fov_min_rad_;
   double vert_fov_max_rad_;
+  bool assume_instantaneous_scan_;
 
   std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_;

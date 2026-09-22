@@ -15,10 +15,11 @@ grid/extend_length_every_resize_by: 30.0
 traversability/robot_radius: 0.55
 # These are terrain-classification limits, not the URDF collision geometry.
 # A single value normalises both step and roughness in the upstream library;
-# 0.28 m is a deliberately moderate initial tolerance for Rubicon rather than
-# treating its small simulated mesh discontinuities as lethal terrain.
-traversability/ground_clearance: 0.28
-traversability/max_slope: 0.52
+# 0.40 m / 0.65 rad are the current permissive Rubicon calibration limits. They
+# avoid classifying the world mesh's drivable undulations as lethal; they are
+# not a final physical-capability claim and must be validated against failures.
+traversability/ground_clearance: 0.40
+traversability/max_slope: 0.65
 traversability/min_points_per_grid: 1
 
 inflation/enabled: true

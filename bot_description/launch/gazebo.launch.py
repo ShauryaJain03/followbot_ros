@@ -193,6 +193,10 @@ def generate_launch_description():
             "num_scan_lines": 16,
             "vertical_fov_min": -15.0,
             "vertical_fov_max": 15.0,
+            # Gazebo GPU LiDAR emits a full raycast snapshot per update, not a
+            # sequential spinning scan.  Avoid synthetic per-point timing and
+            # the resulting false LIO-SAM deskew.
+            "assume_instantaneous_scan": True,
         }],
     )
 
