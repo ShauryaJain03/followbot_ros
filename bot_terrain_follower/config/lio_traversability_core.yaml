@@ -1,0 +1,39 @@
+# Initial sparse-LiDAR tuning for the 1.25 x 0.85 m robot.
+#
+# This library only estimates a cell when every cell in its terrain-analysis
+# disc is occupied.  A 0.10 m grid, 0.76 m disc, and three-point minimum
+# leaves almost every cell unknown with the simulated 16-beam LiDAR.  The
+# 0.55 m radius below is deliberately an analysis neighbourhood, *not* the
+# robot collision footprint.  The eventual custom planner must still apply
+# the full robot footprint / inflation when deciding whether to drive there.
+grid/resolution_local_map: 0.20
+grid/grid_center_x: 0.0
+grid/grid_center_y: 0.0
+grid/half_size_traversability: 30.0
+grid/extend_length_every_resize_by: 30.0
+
+traversability/robot_radius: 0.55
+# These are terrain-classification limits, not the URDF collision geometry.
+# A single value normalises both step and roughness in the upstream library;
+# 0.28 m is a deliberately moderate initial tolerance for Rubicon rather than
+# treating its small simulated mesh discontinuities as lethal terrain.
+traversability/ground_clearance: 0.28
+traversability/max_slope: 0.52
+traversability/min_points_per_grid: 1
+
+inflation/enabled: true
+inflation/inflation_radius: 0.80
+inflation/cost_scaling_factor: 2.0
+inflation/lethal_step_threshold: 0.95
+
+mapping/is_kf_optimization_enabled: true
+mapping/num_local_keyframes: 60
+mapping/global_adjustment_sleep: 0
+
+pointcloud/robot_height: 1.50
+pointcloud/max_range_base_frame: 15.0
+pointcloud/min_range_base_frame: 0.80
+pointcloud/use_pointcloud_buffer: false
+pointcloud/use_ros_buffer: false
+
+node/publish_rate_hz: 2.0

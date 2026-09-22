@@ -1,0 +1,33 @@
+lio_traversability_keyframe_bridge:
+  ros__parameters:
+    cloud_topic: /velodyne_points
+    mapping_odom_topic: /lio_sam/mapping/odometry
+    additions_topic: /traversability_keyframe_additions
+    map_frame: map
+    keyframe_min_displacement_m: 0.25
+    synchronizer_slop_s: 0.15
+
+global_traversability_node:
+  ros__parameters:
+    additions_topic_name: /traversability_keyframe_additions
+    updates_topic_name: /traversability_keyframe_updates
+    # LIO-SAM mapping odometry is the lidar pose. The external mapper will use
+    # base_link <- laser_link from the URDF to account for the sensor offset.
+    slam_frame: laser_link
+    robot_base_frame: base_link
+    lidar_frame: laser_link
+    map_frame: map
+    enable_obstacle_layer: false
+
+local_traversability_node:
+  ros__parameters:
+    pointcloud_topic_name: /velodyne_points
+    odom_topic_name: /lio_sam/mapping/odometry
+    slam_frame: laser_link
+    robot_base_frame: base_link
+    lidar_frame: laser_link
+    map_frame: map
+    window_size: 60
+    keyframe_min_displacement_m: 0.10
+    crop_size_x: 20.0
+    crop_size_y: 20.0

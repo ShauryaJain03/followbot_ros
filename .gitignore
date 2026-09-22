@@ -2,6 +2,7 @@ bot_description/models/rubicon/meshes/rubicon.dae
 /build/
 /install/
 /log/
+third_party/traversability_mapping/
 __pycache__/
 *.pyc
 .DS_Store

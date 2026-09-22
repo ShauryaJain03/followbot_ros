@@ -39,26 +39,55 @@ an infeasible goal at their exact position.
   IMU, ros2_control, and Baylands/Rubicon worlds.
 - Stable simulation clock and joint-state topology: ros2_control is the single
   wheel-joint publisher.
-- Self-contained 2.5D LiDAR traversability mapper; no third-party terrain-map
-  package is required.
-- Per-cell terrain classification from slope, step height, roughness, and
-  vertical obstacle extent.
-- RViz terrain visualization and planner-facing OccupancyGrid outputs.
+- `traversability_mapping` + `grid_map` integration for layered local/global
+  terrain inference beneath the project planner.
+- Per-cell terrain hazard from slope, step height, and roughness, with RViz
+  GridMap and OccupancyGrid visualization.
 - Gazebo ground-truth odometry for simulation validation, separated from the
   LIO-SAM TF configuration.
 - Baseline direct human follower for later comparison.
 
-The active terrain mapper lives in `bot_terrain_follower`. It publishes:
+The active terrain front end lives in `bot_terrain_follower`; its LIO-SAM
+bridge publishes keyframes without publishing TF. The mapper publishes:
 
 | Topic | Frame | Purpose |
 |---|---|---|
-| `/terrain/local_grid` | `base_link` | Rolling terrain grid from the latest LiDAR cloud |
-| `/terrain/global_grid` | `map` | Terrain grid accumulated from registered clouds |
-| `/terrain/costmap` | `map` | Planner-facing accumulated terrain costs |
-| `/terrain/markers` | local/map | RViz terrain classes: green free, yellow/orange costly, red lethal |
+| `/global_traversability_gridmap` | `map` | Persistent layered elevation and hazard map |
+| `/global_traversability_occupancy` | `map` | Global hazard cost map; unknown remains unknown |
+| `/local_traversability_gridmap` | `map` | Rolling layered terrain map near the robot |
+| `/local_traversability_occupancy` | `map` | Rolling terrain hazard cost map |
 
-The global grid requires a valid `map <- laser_link` transform, normally from
-LIO-SAM. The local grid is available from raw LiDAR alone.
+Both map products require LIO-SAM's valid `map <- odom <- base_link` transform.
+
+### External traversability-mapping experiment
+
+The project can also evaluate the GPL-3.0 `traversability_mapping` library. It
+uses `grid_map` for layered elevation/traversability grids, while FollowBot
+retains the human-relative goal manager and planner. The LIO adapter publishes
+only keyframe messages; it never publishes TF.
+
+```bash
+cd ~/followbot_ws/src/followbot_ros
+mkdir -p third_party
+git clone https://github.com/suchetanrs/traversability_mapping.git third_party/traversability_mapping
+cd ~/followbot_ws
+rosdep install --from-paths src/followbot_ros/third_party/traversability_mapping --ignore-src -r -y
+colcon build --base-paths src/followbot_ros/third_party/traversability_mapping \
+  --packages-up-to traversability_mapping_ros ground_truth_kfs traversability_grid_utils \
+  --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
+colcon build --packages-select bot_terrain_follower
+source install/setup.bash
+```
+
+With the LIO-safe Rubicon simulation and LIO-SAM already running:
+
+```bash
+ros2 launch bot_terrain_follower lio_traversability_mapping.launch.py
+```
+
+The library publishes `/global_traversability_gridmap`,
+`/global_traversability_occupancy`, `/local_traversability_gridmap`, and
+`/local_traversability_occupancy`.
 
 ## Build
 
@@ -87,15 +116,18 @@ ros2 launch bot_bringup bot_bringup.launch.py \
 For this mode, use `/odom` in RViz. `/bot_controller/odom` is wheel-integrated
 odometry and will drift on rough terrain or skid-steer turns.
 
-### Terrain-map visualization
+### Terrain-map visualization with LIO-SAM
 
-The terrain demo includes robot bringup and RViz; do not start
-`bot_bringup.launch.py` separately.
+Start the LIO-safe simulation mode below, then LIO-SAM in a second terminal.
+In a third terminal, start the traversability mapper:
 
 ```bash
-ros2 launch bot_terrain_follower terrain_mapping_demo.launch.py \
-  world_name:=rubicon
+ros2 launch bot_terrain_follower lio_traversability_mapping.launch.py
 ```
+
+In RViz, set the fixed frame to `map`. For a traversability view, set a GridMap
+display's Color Layer to `hazard`, Height Layer to `elevation`, and intensity
+range to 0--1. The default elevation colors represent height, not driveability.
 
 Drive the robot with:
 
@@ -127,11 +159,12 @@ map -> odom -> base_link -> laser_link
 
 ## Immediate V1 work
 
-1. Tune and validate terrain thresholds against recorded Rubicon/Baylands
+1. Tune and validate terrain-hazard thresholds against recorded Rubicon/Baylands
    LiDAR data.
-2. Run LIO-SAM with a stable TF tree and validate `/terrain/global_grid`.
-3. Feed `/terrain/costmap` into Nav2 Smac Hybrid-A* and prove a terrain-safe
-   detour before adding dynamic human-follow goals.
+2. Convert hazard and unknown terrain to a custom planner costmap with the full
+   robot footprint.
+3. Integrate the costmap into the custom Hybrid-A* objective and prove a
+   terrain-safe detour before adding dynamic human-follow goals.
 
 ## Main packages
 

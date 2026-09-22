@@ -33,7 +33,7 @@ setup(
             'robot_ground_truth_publisher = bot_terrain_follower.robot_ground_truth_publisher:main',
             'human_pose_publisher = bot_terrain_follower.human_pose_publisher:main',
             'naive_follower = bot_terrain_follower.naive_follower:main',
-            'traversability_analyzer = bot_terrain_follower.traversability_analyzer:main',
+            'lio_traversability_keyframe_bridge = bot_terrain_follower.lio_traversability_keyframe_bridge:main',
             'demo_metrics_logger = bot_terrain_follower.demo_metrics_logger:main',
         ],
     },
