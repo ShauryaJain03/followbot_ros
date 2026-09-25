@@ -70,6 +70,8 @@ only keyframe messages; it never publishes TF.
 cd ~/followbot_ws/src/followbot_ros
 mkdir -p third_party
 git clone https://github.com/suchetanrs/traversability_mapping.git third_party/traversability_mapping
+cd third_party/traversability_mapping
+git apply ../../patches/traversability_mapping_hazard_weights.patch
 cd ~/followbot_ws
 rosdep install --from-paths src/followbot_ros/third_party/traversability_mapping --ignore-src -r -y
 colcon build --base-paths src/followbot_ros/third_party/traversability_mapping \
@@ -88,6 +90,10 @@ ros2 launch bot_terrain_follower lio_traversability_mapping.launch.py
 The library publishes `/global_traversability_gridmap`,
 `/global_traversability_occupancy`, `/local_traversability_gridmap`, and
 `/local_traversability_occupancy`.
+
+FollowBot's small local patch adds configurable aggregate-hazard weights. The
+Rubicon calibration uses slope `1.00`, step `0.55`, and roughness `0.35`; the
+raw component layers are unchanged and remain available for diagnosis in RViz.
 
 ## Build
 

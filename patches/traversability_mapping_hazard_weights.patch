@@ -1,0 +1,57 @@
+diff --git a/traversability_mapping/include/traversability_mapping/LocalMap.hpp b/traversability_mapping/include/traversability_mapping/LocalMap.hpp
+index d17fb7b..6cbea3c 100644
+--- a/traversability_mapping/include/traversability_mapping/LocalMap.hpp
++++ b/traversability_mapping/include/traversability_mapping/LocalMap.hpp
+@@ -176,6 +176,7 @@ namespace traversability_mapping
+         std::string frameId_;
+         double res_;
+         double groundClearance_, maxSlope_;
++        double slopeHazardWeight_, stepHazardWeight_, roughnessHazardWeight_;
+         unsigned int minPointsPerGrid_;
+diff --git a/traversability_mapping/params/traversabilityParams.yaml b/traversability_mapping/params/traversabilityParams.yaml
+index 19a8934..a2aa9ba 100644
+--- a/traversability_mapping/params/traversabilityParams.yaml
++++ b/traversability_mapping/params/traversabilityParams.yaml
+@@ -21,6 +21,9 @@ traversability/robot_radius: 0.20        # robot footprint radius (m)
+ traversability/ground_clearance: 0.15
+ traversability/max_slope: 0.4            # rad; slope hazard normaliser
+ traversability/min_points_per_grid: 3    # each vicinity cell (and the query cell) must carry >= this many points, else the query is a border cell
++traversability/slope_hazard_weight: 1.0
++traversability/step_hazard_weight: 1.0
++traversability/roughness_hazard_weight: 1.0
+diff --git a/traversability_mapping/src/LocalMap.cpp b/traversability_mapping/src/LocalMap.cpp
+index 3e0f8a0..4ebc499 100644
+--- a/traversability_mapping/src/LocalMap.cpp
++++ b/traversability_mapping/src/LocalMap.cpp
+@@ -41,6 +41,9 @@ namespace traversability_mapping
+         groundClearance_ = parameterInstance.getValue<double>("traversability/ground_clearance");
+         maxSlope_ = parameterInstance.getValue<double>("traversability/max_slope");
+         minPointsPerGrid_ = static_cast<unsigned int>(parameterInstance.getValue<int>("traversability/min_points_per_grid"));
++        slopeHazardWeight_ = parameterInstance.getValue<double>("traversability/slope_hazard_weight");
++        stepHazardWeight_ = parameterInstance.getValue<double>("traversability/step_hazard_weight");
++        roughnessHazardWeight_ = parameterInstance.getValue<double>("traversability/roughness_hazard_weight");
+@@ -177,7 +180,14 @@ namespace traversability_mapping
+-        gridMap_.atPosition("hazard", qp) = static_cast<float>(haz[HAZ_OVERALL]);
++        const double weightedHazard = std::max(
++            slopeHazardWeight_ * haz[HAZ_SLOPE],
++            std::max(stepHazardWeight_ * haz[HAZ_STEP],
++                     roughnessHazardWeight_ * haz[HAZ_ROUGHNESS]));
++        gridMap_.atPosition("hazard", qp) = static_cast<float>(std::min(1.0, weightedHazard));
+         gridMap_.atPosition("slope_haz", qp) = static_cast<float>(haz[HAZ_SLOPE]);
+diff --git a/traversability_mapping/src/Parameters.cpp b/traversability_mapping/src/Parameters.cpp
+index 1559ffc..a3d1d40 100644
+--- a/traversability_mapping/src/Parameters.cpp
++++ b/traversability_mapping/src/Parameters.cpp
+@@ -50,6 +50,17 @@ ParameterHandler::ParameterHandler(std::string yaml_file_path)
+     parameter_map_["traversability/ground_clearance"] = loaded_node["traversability/ground_clearance"].as<double>();
+     parameter_map_["traversability/max_slope"] = loaded_node["traversability/max_slope"].as<double>();
+     parameter_map_["traversability/min_points_per_grid"] = loaded_node["traversability/min_points_per_grid"].as<int>();
++    parameter_map_["traversability/slope_hazard_weight"] =
++        loaded_node["traversability/slope_hazard_weight"] ?
++        loaded_node["traversability/slope_hazard_weight"].as<double>() : 1.0;
++    parameter_map_["traversability/step_hazard_weight"] =
++        loaded_node["traversability/step_hazard_weight"] ?
++        loaded_node["traversability/step_hazard_weight"].as<double>() : 1.0;
++    parameter_map_["traversability/roughness_hazard_weight"] =
++        loaded_node["traversability/roughness_hazard_weight"] ?
++        loaded_node["traversability/roughness_hazard_weight"].as<double>() : 1.0;

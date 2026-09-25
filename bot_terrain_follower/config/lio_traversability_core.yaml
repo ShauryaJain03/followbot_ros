@@ -15,12 +15,19 @@ grid/extend_length_every_resize_by: 30.0
 traversability/robot_radius: 0.55
 # These are terrain-classification limits, not the URDF collision geometry.
 # A single value normalises both step and roughness in the upstream library;
-# 0.40 m / 0.65 rad are the current permissive Rubicon calibration limits. They
+# 0.40 m / 0.85 rad are the current permissive Rubicon calibration limits. They
 # avoid classifying the world mesh's drivable undulations as lethal; they are
 # not a final physical-capability claim and must be validated against failures.
 traversability/ground_clearance: 0.40
-traversability/max_slope: 0.65
+traversability/max_slope: 0.85
 traversability/min_points_per_grid: 1
+# Preserve slope as the dominant terrain limit.  Simulated LiDAR quantisation
+# and Rubicon mesh seams make the raw step/roughness layers overly punitive;
+# their raw layers are still published for diagnosis while only the aggregate
+# planner-facing hazard uses these weights.
+traversability/slope_hazard_weight: 1.00
+traversability/step_hazard_weight: 0.55
+traversability/roughness_hazard_weight: 0.35
 
 inflation/enabled: true
 inflation/inflation_radius: 0.80
