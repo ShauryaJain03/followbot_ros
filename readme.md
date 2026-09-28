@@ -134,8 +134,7 @@ Use this mode to validate robot motion in Gazebo. Ground truth publishes
 `/odom` and owns `odom -> base_link`.
 
 ```bash
-ros2 launch bot_bringup bot_bringup.launch.py \
-  world_name:=baylands use_rviz:=false
+ros2 launch bot_bringup bot_bringup.launch.py     world_name:=baylands     use_ground_truth_odom:=true     publish_ground_truth_odom:=false     use_rviz:=false
 ```
 
 For this mode, use `/odom` in RViz. `/bot_controller/odom` is wheel-integrated
