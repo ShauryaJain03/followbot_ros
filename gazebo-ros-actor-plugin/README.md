@@ -78,8 +78,8 @@ Gazebo actor:
 - `/human_path` (`nav_msgs/msg/Path`): full actor route received by the plugin.
 - `/human_pose` (`geometry_msgs/msg/PoseStamped`): current actor pose from Gazebo.
 
-When `bot_bringup` is launched with `world_name:=baylands`, this publisher is
-started automatically after a short delay.
+`bot_bringup` never starts this publisher automatically. In FollowBot, use the
+manual `actor_route.launch.py` launcher after Baylands is running.
 
 ## Terrain-Aware Height
 
@@ -144,3 +144,26 @@ Published topics from the actor plugin:
 ## License
 
 Apache-2.0
+# FollowBot actor route
+
+`path_publisher.py` sends a manually triggered, constant-speed straight route
+to the Baylands actor plugin. It publishes the same path briefly several times
+so it is not lost if Gazebo's actor subscription starts late.
+
+Start Baylands first, then send a default northbound route:
+
+```bash
+ros2 launch gazebo_ros_actor_plugin actor_route.launch.py
+```
+
+The route direction is controlled by `heading` in radians. For example, a
+10 m eastbound route is:
+
+```bash
+ros2 launch gazebo_ros_actor_plugin actor_route.launch.py \
+  heading:=0.0 num_waypoints:=11 waypoint_spacing:=1.0
+```
+
+The actor's physical walking speed remains the Baylands world parameter
+`linear_velocity` (currently 0.3 m/s). V1 routes should use constant speed
+and gradual, bounded-curvature turns.

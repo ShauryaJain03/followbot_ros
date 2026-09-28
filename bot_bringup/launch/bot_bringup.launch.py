@@ -52,9 +52,6 @@ def generate_launch_description():
 
     model = LaunchConfiguration("model")
     world_name = LaunchConfiguration("world_name")
-    is_baylands_world = PythonExpression([
-        "'", world_name, "' == 'baylands'"
-    ])
     use_ground_truth_odom = LaunchConfiguration("use_ground_truth_odom")
     publish_ground_truth_odom = LaunchConfiguration("publish_ground_truth_odom")
     use_rviz = LaunchConfiguration("use_rviz")
@@ -114,17 +111,6 @@ def generate_launch_description():
         output='screen',
     )
 
-    actor_path_publisher = Node(
-        package='gazebo_ros_actor_plugin',
-        executable='path_publisher.py',
-        name='actor_path_publisher',
-        condition=IfCondition(is_baylands_world),
-        parameters=[{
-            'cmd_path_delay': 5.0,
-        }],
-        output='screen',
-    )
-
     rviz_node = TimerAction(
         period=10.0,
         actions=[
@@ -155,6 +141,5 @@ def generate_launch_description():
         gazebo,
         controller,
         ground_truth_odom,
-        actor_path_publisher,
         rviz_node
     ])

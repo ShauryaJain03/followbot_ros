@@ -1,9 +1,9 @@
 # FollowBot ROS
 
 ROS 2 research workspace for a four-wheel differential-drive robot that follows
-a person in rough terrain without blindly reproducing the person's path.
+a person in rough terrain without reproducing the person's path.
 
-## V1 goal
+## Phased development cycle - current V1 goal 
 
 A person can traverse terrain that a wheeled robot cannot. V1 therefore treats
 the detected person as evidence of navigational intent, selects a safe
@@ -29,22 +29,17 @@ RGB-D camera ──> human detection/localization ──> human-relative follow 
                                             local controller -> robot
 ```
 
-V1 is deliberately a conservative, explainable system. Unknown terrain is not
-considered traversable; a feasible position near the person is preferable to
-an infeasible goal at their exact position.
+Unknown terrain is not considered traversable; a feasible position near the person is preferable to an infeasible goal at their exact position.
 
 ## Current implementation
 
-- Gazebo Fortress simulation with the FollowBot URDF, 3D LiDAR, RGB-D camera,
+- Gazebo Fortress simulation with the FollowBot, 3D LiDAR, RGB-D camera,
   IMU, ros2_control, and Baylands/Rubicon worlds.
 - Stable simulation clock and joint-state topology: ros2_control is the single
   wheel-joint publisher.
 - `traversability_mapping` + `grid_map` integration for layered local/global
   terrain inference beneath the project planner.
-- Per-cell terrain hazard from slope, step height, and roughness, with RViz
-  GridMap and OccupancyGrid visualization.
-- Gazebo ground-truth odometry for simulation validation, separated from the
-  LIO-SAM TF configuration.
+- Per-cell terrain hazard from slope, step height, and roughness, with RViz visualization.
 - Baseline direct human follower for later comparison.
 
 The active terrain front end lives in `bot_terrain_follower`; its LIO-SAM
@@ -61,8 +56,7 @@ Both map products require LIO-SAM's valid `map <- odom <- base_link` transform.
 
 ### External traversability-mapping experiment
 
-The project can also evaluate the GPL-3.0 `traversability_mapping` library. It
-uses `grid_map` for layered elevation/traversability grids, while FollowBot
+It uses `grid_map` for layered elevation/traversability grids, while FollowBot
 retains the human-relative goal manager and planner. The LIO adapter publishes
 only keyframe messages; it never publishes TF.
 
@@ -92,8 +86,7 @@ The library publishes `/global_traversability_gridmap`,
 `/local_traversability_occupancy`.
 
 FollowBot's small local patch adds configurable aggregate-hazard weights. The
-Rubicon calibration uses slope `1.00`, step `0.55`, and roughness `0.35`; the
-raw component layers are unchanged and remain available for diagnosis in RViz.
+Rubicon calibration uses slope `1.00`, step `0.55`, and roughness `0.35`
 
 ## Build
 
@@ -108,6 +101,32 @@ source install/setup.bash
 
 Use one simulation launch per ROS domain. Every launch owns a Gazebo `/clock`
 bridge; running two simulators together causes time jumps and invalid TF.
+
+### Manual human-actor routes
+
+Baylands contains `walker_slow_red`, which publishes its actual pose on
+`/human_pose` and accepted route on `/human_path`, both in `map`. Bringup does
+not move the actor automatically: launch a route explicitly after Baylands has
+started. V1 deliberately uses constant-speed, straight or slowly turning routes
+only
+
+```bash
+# Terminal 1: start Baylands.
+ros2 launch bot_bringup bot_bringup.launch.py \
+  world_name:=baylands use_rviz:=false
+
+# Terminal 2: manually start the default northbound route.
+ros2 launch gazebo_ros_actor_plugin actor_route.launch.py
+```
+
+The actor's Baylands speed is `0.3 m/s`. `actor_route.launch.py` publishes the
+route five times to avoid startup-message loss. Its `heading` controls both
+the direction of motion and actor orientation; for a 10 m eastbound route:
+
+```bash
+ros2 launch gazebo_ros_actor_plugin actor_route.launch.py \
+  heading:=0.0 num_waypoints:=11 waypoint_spacing:=1.0
+```
 
 ### Ground-truth odometry validation
 
