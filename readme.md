@@ -108,7 +108,7 @@ Baylands contains `walker_slow_red`, which publishes its actual pose on
 `/human_pose` and accepted route on `/human_path`, both in `map`. Bringup does
 not move the actor automatically: launch a route explicitly after Baylands has
 started. V1 deliberately uses constant-speed, straight or slowly turning routes
-only
+only.
 
 ```bash
 # Terminal 1: start Baylands.
@@ -131,10 +131,22 @@ ros2 launch gazebo_ros_actor_plugin actor_route.launch.py \
 ### Ground-truth odometry validation
 
 Use this mode to validate robot motion in Gazebo. Ground truth publishes
-`/odom` and owns `odom -> base_link`.
+`/odom` and owns `odom -> base_link`; do not start LIO-SAM in this mode.
 
 ```bash
-ros2 launch bot_bringup bot_bringup.launch.py     world_name:=baylands     use_ground_truth_odom:=true     publish_ground_truth_odom:=false     use_rviz:=false
+# Baylands: publish Gazebo ground-truth odometry and TF.
+ros2 launch bot_bringup bot_bringup.launch.py \
+  world_name:=baylands \
+  use_ground_truth_odom:=true \
+  publish_ground_truth_odom:=true \
+  use_rviz:=false
+
+# Rubicon: publish Gazebo ground-truth odometry and TF.
+ros2 launch bot_bringup bot_bringup.launch.py \
+  world_name:=rubicon \
+  use_ground_truth_odom:=true \
+  publish_ground_truth_odom:=true \
+  use_rviz:=false
 ```
 
 For this mode, use `/odom` in RViz. `/bot_controller/odom` is wheel-integrated
@@ -163,11 +175,20 @@ ros2 run teleop_twist_keyboard teleop_twist_keyboard \
 ### LIO-SAM mode
 
 LIO-SAM must be the sole owner of `odom -> base_link`. Keep the controller TF
-disabled and suppress the Gazebo ground-truth odometry publisher:
+disabled and suppress the Gazebo ground-truth odometry publisher
+(`publish_ground_truth_odom:=false`):
 
 ```bash
+# Baylands: LIO-SAM owns the localization TF.
 ros2 launch bot_bringup bot_bringup.launch.py \
   world_name:=baylands \
+  use_ground_truth_odom:=true \
+  publish_ground_truth_odom:=false \
+  use_rviz:=false
+
+# Rubicon: LIO-SAM owns the localization TF.
+ros2 launch bot_bringup bot_bringup.launch.py \
+  world_name:=rubicon \
   use_ground_truth_odom:=true \
   publish_ground_truth_odom:=false \
   use_rviz:=false
