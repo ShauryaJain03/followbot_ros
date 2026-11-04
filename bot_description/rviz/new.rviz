@@ -134,6 +134,68 @@ Visualization Manager:
         Reliability Policy: Reliable
         Value: /camera/image
       Value: true
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz_default_plugins/Pose
+      Color: 0; 255; 0
+      Enabled: true
+      Head Length: 0.3
+      Head Radius: 0.15
+      Name: Leader Pose
+      Shaft Length: 0.7
+      Shaft Radius: 0.06
+      Shape: Arrow
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /leader_pose
+      Value: true
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz_default_plugins/Path
+      Color: 0; 255; 0
+      Enabled: true
+      Head Diameter: 0.2
+      Head Length: 0.3
+      Line Style: Lines
+      Line Width: 0.05
+      Name: Leader Path
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0.03
+      Pose Style: None
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /leader_path
+      Value: true
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz_default_plugins/Path
+      Color: 255; 80; 0
+      Enabled: true
+      Head Diameter: 0.2
+      Head Length: 0.3
+      Line Style: Lines
+      Line Width: 0.05
+      Name: Robot Path
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0.05
+      Pose Style: None
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /robot_path
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48

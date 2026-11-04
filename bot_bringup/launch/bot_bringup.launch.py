@@ -93,7 +93,7 @@ def generate_launch_description():
     ])
 
     ground_truth_odom = Node(
-        package='bot_terrain_follower',
+        package='bot_bringup',
         executable='robot_ground_truth_publisher',
         name='robot_ground_truth_publisher',
         parameters=[{

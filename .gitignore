@@ -2,7 +2,6 @@ bot_description/models/rubicon/meshes/rubicon.dae
 /build/
 /install/
 /log/
-third_party/traversability_mapping/
 __pycache__/
 *.pyc
 .DS_Store
@@ -12,6 +11,5 @@ __pycache__/
 gazebo-ros-actor-plugin/config/models/baylands/
 gazebo-ros-actor-plugin/config/models/accessories/
 gazebo-ros-actor-plugin/config/models/office/
-gazebo-ros-actor-plugin/config/models/rubicon/
 gazebo-ros-actor-plugin/config/models/aws_robomaker_residential_*/
 gazebo-ros-actor-plugin/config/models/aws_robomaker_warehouse_*/

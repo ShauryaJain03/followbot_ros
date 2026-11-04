@@ -1,223 +1,67 @@
 # FollowBot ROS
 
-ROS 2 research workspace for a four-wheel differential-drive robot that follows
-a person in rough terrain without reproducing the person's path.
+ROS 2 workspace for the FollowBot simulation and supporting perception,
+localization, and terrain-mapping packages.
 
-## Phased development cycle - current V1 goal 
+## Repository contents
 
-A person can traverse terrain that a wheeled robot cannot. V1 therefore treats
-the detected person as evidence of navigational intent, selects a safe
-human-relative goal, and plans the robot's own feasible route.
+| Package or directory | Contents |
+|---|---|
+| `bot_description` | FollowBot URDF/Xacro, Gazebo bridges, point-cloud transform node, RViz configuration, and simulation worlds. |
+| `bot_controller` | `ros2_control` differential-drive controller configuration and launch file. |
+| `bot_bringup` | Simulation bringup, controller launch, RViz launch, and Gazebo ground-truth odometry wiring. |
+| `bot_bringup` | Simulation bringup and `robot_ground_truth_publisher`, which publishes `/robot_pose_gt`, `/odom`, and optionally `odom -> base_link` from Gazebo world poses. |
+| `LIO-SAM` | LIO-SAM ROS 2 package with `run.launch.py`, configuration, messages, and services. |
+| `human_detector/human_detector` | Python human-detector package using RGB, depth, camera information, and TF dependencies. |
 
-The intended navigation objective is:
+## Simulation assets
 
-\[
-J = w_f J_f + w_t J_t + w_o J_o
-\]
+`bot_description/worlds` contains these Gazebo worlds:
 
-where \(J_f\) maintains the human--robot relationship, \(J_t\) penalizes or
-rejects terrain outside robot capability, and \(J_o\) handles collision and
-clearance costs.
+- `empty`
+- `baylands`
 
-```text
-RGB-D camera ──> human detection/localization ──> human-relative follow goal
-                                                        │
-3D LiDAR + IMU ──> LIO-SAM ──> terrain costmap ────────┤
-                                                        ▼
-                                             Smac Hybrid-A* / Nav2
-                                                        ▼
-                                            local controller -> robot
-```
-
-Unknown terrain is not considered traversable; a feasible position near the person is preferable to an infeasible goal at their exact position.
-
-## Current implementation
-
-- Gazebo Fortress simulation with the FollowBot, 3D LiDAR, RGB-D camera,
-  IMU, ros2_control, and Baylands/Rubicon worlds.
-- Stable simulation clock and joint-state topology: ros2_control is the single
-  wheel-joint publisher.
-- `traversability_mapping` + `grid_map` integration for layered local/global
-  terrain inference beneath the project planner.
-- Per-cell terrain hazard from slope, step height, and roughness, with RViz visualization.
-- Baseline direct human follower for later comparison.
-
-The active terrain front end lives in `bot_terrain_follower`; its LIO-SAM
-bridge publishes keyframes without publishing TF. The mapper publishes:
-
-| Topic | Frame | Purpose |
-|---|---|---|
-| `/global_traversability_gridmap` | `map` | Persistent layered elevation and hazard map |
-| `/global_traversability_occupancy` | `map` | Global hazard cost map; unknown remains unknown |
-| `/local_traversability_gridmap` | `map` | Rolling layered terrain map near the robot |
-| `/local_traversability_occupancy` | `map` | Rolling terrain hazard cost map |
-
-Both map products require LIO-SAM's valid `map <- odom <- base_link` transform.
-
-### External traversability-mapping experiment
-
-It uses `grid_map` for layered elevation/traversability grids, while FollowBot
-retains the human-relative goal manager and planner. The LIO adapter publishes
-only keyframe messages; it never publishes TF.
-
-```bash
-cd ~/followbot_ws/src/followbot_ros
-mkdir -p third_party
-git clone https://github.com/suchetanrs/traversability_mapping.git third_party/traversability_mapping
-cd third_party/traversability_mapping
-git apply ../../patches/traversability_mapping_hazard_weights.patch
-cd ~/followbot_ws
-rosdep install --from-paths src/followbot_ros/third_party/traversability_mapping --ignore-src -r -y
-colcon build --base-paths src/followbot_ros/third_party/traversability_mapping \
-  --packages-up-to traversability_mapping_ros ground_truth_kfs traversability_grid_utils \
-  --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
-colcon build --packages-select bot_terrain_follower
-source install/setup.bash
-```
-
-With the LIO-safe Rubicon simulation and LIO-SAM already running:
-
-```bash
-ros2 launch bot_terrain_follower lio_traversability_mapping.launch.py
-```
-
-The library publishes `/global_traversability_gridmap`,
-`/global_traversability_occupancy`, `/local_traversability_gridmap`, and
-`/local_traversability_occupancy`.
-
-FollowBot's small local patch adds configurable aggregate-hazard weights. The
-Rubicon calibration uses slope `1.00`, step `0.55`, and roughness `0.35`
+The robot model includes RGB-D, IMU, 2D LiDAR, and 3D LiDAR sensors. The
+Gazebo bridge exposes their ROS topics and starts `pointcloud_transform`, which
+converts `/points` into `/velodyne_points` for LIO-SAM-compatible input.
 
 ## Build
 
-From this workspace root:
+Build the simulator stack:
 
 ```bash
-colcon build --symlink-install
+cd ~/followbot_ws
+colcon build --packages-select bot_description bot_controller bot_bringup --symlink-install
 source install/setup.bash
 ```
 
-## Simulation launch modes
-
-Use one simulation launch per ROS domain. Every launch owns a Gazebo `/clock`
-bridge; running two simulators together causes time jumps and invalid TF.
-
-### Manual human-actor routes
-
-Baylands contains `walker_slow_red`, which publishes its actual pose on
-`/human_pose` and accepted route on `/human_path`, both in `map`. Bringup does
-not move the actor automatically: launch a route explicitly after Baylands has
-started. V1 deliberately uses constant-speed, straight or slowly turning routes
-only.
+## Ground-truth simulation launch
 
 ```bash
-# Terminal 1: start Baylands.
 ros2 launch bot_bringup bot_bringup.launch.py \
-  world_name:=baylands use_rviz:=false
-
-# Terminal 2: manually start the default northbound route.
-ros2 launch gazebo_ros_actor_plugin actor_route.launch.py
-```
-
-The actor's Baylands speed is `0.3 m/s`. `actor_route.launch.py` publishes the
-route five times to avoid startup-message loss. Its `heading` controls both
-the direction of motion and actor orientation; for a 10 m eastbound route:
-
-```bash
-ros2 launch gazebo_ros_actor_plugin actor_route.launch.py \
-  heading:=0.0 num_waypoints:=11 waypoint_spacing:=1.0
-```
-
-### Ground-truth odometry validation
-
-Use this mode to validate robot motion in Gazebo. Ground truth publishes
-`/odom` and owns `odom -> base_link`; do not start LIO-SAM in this mode.
-
-```bash
-# Baylands: publish Gazebo ground-truth odometry and TF.
-ros2 launch bot_bringup bot_bringup.launch.py \
-  world_name:=baylands \
+  world_name:=empty \
   use_ground_truth_odom:=true \
   publish_ground_truth_odom:=true \
-  use_rviz:=false
-
-# Rubicon: publish Gazebo ground-truth odometry and TF.
-ros2 launch bot_bringup bot_bringup.launch.py \
-  world_name:=rubicon \
-  use_ground_truth_odom:=true \
-  publish_ground_truth_odom:=true \
-  use_rviz:=false
+  use_rviz:=true
 ```
 
-For this mode, use `/odom` in RViz. `/bot_controller/odom` is wheel-integrated
-odometry and will drift on rough terrain or skid-steer turns.
+With ground-truth odometry enabled, `/odom` and `odom -> base_link` are
+published by `robot_ground_truth_publisher`. In RViz, use `odom` as the fixed
+frame.
 
-### Terrain-map visualization with LIO-SAM
+## LIO-SAM launch mode
 
-Start the LIO-safe simulation mode below, then LIO-SAM in a second terminal.
-In a third terminal, start the traversability mapper:
-
-```bash
-ros2 launch bot_terrain_follower lio_traversability_mapping.launch.py
-```
-
-In RViz, set the fixed frame to `map`. For a traversability view, set a GridMap
-display's Color Layer to `hazard`, Height Layer to `elevation`, and intensity
-range to 0--1. The default elevation colors represent height, not driveability.
-
-Drive the robot with:
+For LIO-SAM, launch the simulation without the ground-truth odometry publisher:
 
 ```bash
-ros2 run teleop_twist_keyboard teleop_twist_keyboard \
-  --ros-args -r /cmd_vel:=/bot_controller/cmd_vel_unstamped
-```
-
-### LIO-SAM mode
-
-LIO-SAM must be the sole owner of `odom -> base_link`. Keep the controller TF
-disabled and suppress the Gazebo ground-truth odometry publisher
-(`publish_ground_truth_odom:=false`):
-
-```bash
-# Baylands: LIO-SAM owns the localization TF.
 ros2 launch bot_bringup bot_bringup.launch.py \
   world_name:=baylands \
   use_ground_truth_odom:=true \
   publish_ground_truth_odom:=false \
   use_rviz:=false
 
-# Rubicon: LIO-SAM owns the localization TF.
-ros2 launch bot_bringup bot_bringup.launch.py \
-  world_name:=rubicon \
-  use_ground_truth_odom:=true \
-  publish_ground_truth_odom:=false \
-  use_rviz:=false
+ros2 launch lio_sam run.launch.py
 ```
 
-Then start LIO-SAM in another terminal using the Baylands parameter file.
-The expected tree is:
-
-```text
-map -> odom -> base_link -> laser_link
-       LIO-SAM
-```
-
-## Immediate V1 work
-
-1. Tune and validate terrain-hazard thresholds against recorded Rubicon/Baylands
-   LiDAR data.
-2. Convert hazard and unknown terrain to a custom planner costmap with the full
-   robot footprint.
-3. Integrate the costmap into the custom Hybrid-A* objective and prove a
-   terrain-safe detour before adding dynamic human-follow goals.
-
-## Main packages
-
-- `bot_description`: robot model, worlds, Gazebo bridges, and point-cloud
-  preprocessing.
-- `bot_controller`: ros2_control differential-drive configuration.
-- `bot_bringup`: simulation, clock, TF, controller, and odometry launch.
-- `bot_terrain_follower`: terrain mapper, visualization, baseline follower,
-  simulation ground-truth publisher, and metrics.
-- `human_detector`: RGB-D human detection and `detected_human` TF.
-- `LIO-SAM`: LiDAR-inertial odometry and mapping integration.
+In this mode, LIO-SAM publishes the localization transform chain. The expected
+frames are `map -> odom -> base_link -> laser_link`.

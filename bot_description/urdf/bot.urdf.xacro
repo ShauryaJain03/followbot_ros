@@ -66,8 +66,8 @@
     <geometry>
       <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
     </geometry>
-    <material name="gray">
-      <color rgba="0.2 0.2 0.2 1" />
+    <material name="high_visibility_orange">
+      <color rgba="1.0 0.35 0.0 1" />
     </material>
   </visual>
 
@@ -436,6 +436,9 @@
 
     <gazebo>
         <plugin filename="ign_ros2_control-system" name="ign_ros2_control::IgnitionROS2ControlPlugin">
+          <ros>
+            <remapping>/bot_controller/cmd_vel_unstamped:=/cmd_vel</remapping>
+          </ros>
             <parameters>$(arg controller_params_file)</parameters>
         </plugin>
         <plugin filename="libignition-gazebo-imu-system.so" name="ignition::gazebo::systems::Imu">

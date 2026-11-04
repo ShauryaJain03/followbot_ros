@@ -26,7 +26,7 @@ ament_target_dependencies(
 
 
 install(
-  DIRECTORY launch rviz urdf worlds models photos config
+  DIRECTORY launch rviz urdf worlds models config
   DESTINATION share/${PROJECT_NAME}
 )
 
