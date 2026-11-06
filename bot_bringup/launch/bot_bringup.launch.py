@@ -10,7 +10,7 @@ from launch.substitutions import LaunchConfiguration, PythonExpression
 
 def generate_launch_description():
     bot_description = get_package_share_directory("bot_description")
-    default_rviz_config = os.path.join(bot_description, "rviz", "display.rviz")
+    default_rviz_config = os.path.join(bot_description, "rviz", "new_default.rviz")
 
     model_arg = DeclareLaunchArgument(
         "model",
