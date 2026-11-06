@@ -25,7 +25,9 @@ def generate_launch_description():
         executable="spawner",
         arguments=["bot_controller", 
                    "--controller-manager", 
-                   "/controller_manager"
+                   "/controller_manager",
+                   "--controller-ros-args",
+                   "--ros-args --remap /bot_controller/cmd_vel:=/cmd_vel",
         ],
         parameters=[{'use_sim_time': True}]
     )

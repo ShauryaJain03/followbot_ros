@@ -104,8 +104,8 @@ def generate_launch_description():
             "/navsat@sensor_msgs/msg/NavSatFix@gz.msgs.NavSat",
             "/camera/points@sensor_msgs/msg/PointCloud2@gz.msgs.PointCloudPacked",
             world_pose_bridge,
-            '/scan' + '@sensor_msgs/msg/LaserScan' + '[' + 'ignition.msgs.LaserScan',
-            '/lidar_3d/points'  + '@sensor_msgs/msg/PointCloud2'   + '[' + 'ignition.msgs.PointCloudPacked',],
+            '/scan' + '@sensor_msgs/msg/LaserScan' + '[' + 'gz.msgs.LaserScan',
+            '/lidar_3d/points'  + '@sensor_msgs/msg/PointCloud2'   + '[' + 'gz.msgs.PointCloudPacked',],
         parameters= [{'qos_overrides./diff_drive_example.subscriber.reliability': 'reliable'}],
         remappings= [
                     ('/scan',     '/scan'   ),

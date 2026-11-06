@@ -37,7 +37,6 @@ bot_controller:
     left_wheel_radius_multiplier: 1.0
     right_wheel_radius_multiplier: 1.0
 
-    use_stamped_vel: false
     base_frame_id: base_link
 
     publish_limited_velocity: true

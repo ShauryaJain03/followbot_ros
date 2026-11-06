@@ -25,7 +25,6 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            "mock_battery=bot_bringup.mock_battery:main",
             'robot_ground_truth_publisher = '
             'bot_bringup.robot_ground_truth_publisher:main',
         ],

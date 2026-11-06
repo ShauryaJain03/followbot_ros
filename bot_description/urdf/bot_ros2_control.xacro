@@ -3,10 +3,9 @@
 
     <ros2_control name="RobotSystem" type="system">
 
-        <!-- ros2_control Gazebo -->
-        <!-- ROS 2 Humble -->
+        <!-- Gazebo Harmonic / ROS 2 Jazzy -->
         <hardware>
-            <plugin>ign_ros2_control/IgnitionSystem</plugin>
+            <plugin>gz_ros2_control/GazeboSimSystem</plugin>
         </hardware>
     
         <!-- ros2_control Common Interfaces --> 

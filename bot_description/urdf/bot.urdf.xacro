@@ -1,9 +1,6 @@
 <?xml version="1.0" ?>
 <robot name="bot" xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <xacro:arg name="controller_params_file" default="$(find bot_controller)/config/bot_controller.yaml"/>
-  <xacro:include filename="bot_ros2_control.xacro" />
-
   <xacro:property name="chassis_length" value="1.25"/>
   <xacro:property name="chassis_width" value="0.85"/>
   <xacro:property name="chassis_height" value="0.40"/>
@@ -242,7 +239,7 @@
       <visualize>true</visualize>
       <always_on>true</always_on>
       <frame_id>laser_link</frame_id>
-      <ignition_frame_id>laser_link</ignition_frame_id>
+      <gz_frame_id>laser_link</gz_frame_id>
       <topic>/lidar_3d</topic>
       <lidar>
         <scan>
@@ -278,7 +275,7 @@
     <sensor type="gpu_lidar" name="generic_twold_lidar_sensor">
       <topic>/scan</topic>
       <frame_id>laser_link</frame_id>
-      <ignition_frame_id>laser_link</ignition_frame_id>
+      <gz_frame_id>laser_link</gz_frame_id>
       <update_rate>50.0</update_rate>
       <ray>
         <scan>
@@ -327,7 +324,7 @@
      <sensor name="imu_sensor" type="imu">
       <topic>/imu</topic>
       <frame_id>imu_link</frame_id>
-      <ignition_frame_id>imu_link</ignition_frame_id>
+      <gz_frame_id>imu_link</gz_frame_id>
       <always_on>true</always_on>
       <update_rate>100</update_rate>
       <visualize>true</visualize>
@@ -398,10 +395,10 @@
   </gazebo>
 
   <joint name="wheel_front_right_joint" type="continuous">
-    <origin xyz="${wheelbase / 2.0} ${track_width / 2.0} ${wheel_z}" rpy="${pi / 2.0} 0.0 0.0"/>
+    <origin xyz="${wheelbase / 2.0} ${track_width / 2.0} ${wheel_z}" rpy="${-pi / 2.0} 0.0 0.0"/>
     <parent link="base_link"/>
     <child link="wheel_front_right"/>
-    <axis xyz="0.0 0.0 -1.0"/>
+    <axis xyz="0.0 0.0 1.0"/>
   </joint>
 
 
@@ -414,10 +411,10 @@
   </joint>
 
   <joint name="wheel_back_right_joint" type="continuous">
-    <origin xyz="${-wheelbase / 2.0} ${track_width / 2.0} ${wheel_z}" rpy="${pi / 2.0} 0.0 0.0"/>
+    <origin xyz="${-wheelbase / 2.0} ${track_width / 2.0} ${wheel_z}" rpy="${-pi / 2.0} 0.0 0.0"/>
     <parent link="base_link"/>
     <child link="wheel_back_right"/>
-    <axis xyz="0.0 0.0 -1.0"/>
+    <axis xyz="0.0 0.0 1.0"/>
 
   </joint>
 
@@ -435,21 +432,33 @@
   <xacro:wheel_contact link="wheel_back_left"/>
 
     <gazebo>
-        <plugin filename="ign_ros2_control-system" name="ign_ros2_control::IgnitionROS2ControlPlugin">
-          <ros>
-            <remapping>/bot_controller/cmd_vel_unstamped:=/cmd_vel</remapping>
-          </ros>
-            <parameters>$(arg controller_params_file)</parameters>
+        <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
+          <left_joint>wheel_front_right_joint</left_joint>
+          <left_joint>wheel_back_right_joint</left_joint>
+          <right_joint>wheel_front_left_joint</right_joint>
+          <right_joint>wheel_back_left_joint</right_joint>
+          <wheel_separation>${track_width}</wheel_separation>
+          <wheel_radius>${wheel_radius}</wheel_radius>
+          <max_linear_acceleration>2.0</max_linear_acceleration>
+          <max_angular_acceleration>2.0</max_angular_acceleration>
+          <topic>/cmd_vel</topic>
         </plugin>
-        <plugin filename="libignition-gazebo-imu-system.so" name="ignition::gazebo::systems::Imu">
+        <plugin filename="gz-sim-odometry-publisher-system" name="gz::sim::systems::OdometryPublisher">
+          <odom_frame>odom</odom_frame>
+          <robot_base_frame>base_link</robot_base_frame>
+          <odom_publish_frequency>50</odom_publish_frequency>
+          <odom_topic>/odom_gz</odom_topic>
+          <dimensions>2</dimensions>
+        </plugin>
+        <plugin filename="gz-sim-imu-system" name="gz::sim::systems::Imu">
           <initial_orientation_as_reference>false</initial_orientation_as_reference>
         </plugin>
-        <plugin filename="libignition-gazebo-sensors-system.so" name="ignition::gazebo::systems::Sensors">
+        <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
           <render_engine>ogre2</render_engine>
         </plugin>
         <plugin
-        filename="ignition-gazebo-navsat-system"
-        name="ignition::gazebo::systems::NavSat">
+        filename="gz-sim-navsat-system"
+        name="gz::sim::systems::NavSat">
       </plugin>
     </gazebo>
 

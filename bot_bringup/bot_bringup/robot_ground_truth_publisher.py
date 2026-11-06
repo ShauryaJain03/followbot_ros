@@ -1,13 +1,10 @@
 """Publish robot ground-truth pose and local odometry from Gazebo pose info."""
 
 import math
-from typing import Optional
-
 import rclpy
 from geometry_msgs.msg import PoseStamped, TransformStamped
 from nav_msgs.msg import Odometry
 from rclpy.node import Node
-from tf2_msgs.msg import TFMessage
 from tf2_ros import TransformBroadcaster
 
 
@@ -16,8 +13,7 @@ class RobotGroundTruthPublisher(Node):
 
     def __init__(self):
         super().__init__('robot_ground_truth_publisher')
-        self.declare_parameter('world_pose_topic', '/world/baylands/pose/info')
-        self.declare_parameter('robot_entity_name', 'bot')
+        self.declare_parameter('source_odom_topic', '/odom_gz')
         self.declare_parameter('pose_topic', '/robot_pose_gt')
         self.declare_parameter('map_frame_id', 'map')
         self.declare_parameter('odom_topic', '/odom')
@@ -25,7 +21,6 @@ class RobotGroundTruthPublisher(Node):
         self.declare_parameter('base_frame_id', 'base_link')
         self.declare_parameter('publish_tf', True)
 
-        self.robot_entity_name = self.get_parameter('robot_entity_name').value
         self.map_frame_id = self.get_parameter('map_frame_id').value
         self.odom_frame_id = self.get_parameter('odom_frame_id').value
         self.base_frame_id = self.get_parameter('base_frame_id').value
@@ -36,50 +31,33 @@ class RobotGroundTruthPublisher(Node):
             Odometry, self.get_parameter('odom_topic').value, 10)
         self.tf_broadcaster = TransformBroadcaster(self) if self.publish_tf else None
         self.create_subscription(
-            TFMessage,
-            self.get_parameter('world_pose_topic').value,
-            self.world_pose_callback,
+            Odometry,
+            self.get_parameter('source_odom_topic').value,
+            self.odom_callback,
             10,
         )
         self.origin_x = self.origin_y = self.origin_yaw = None
-        self.last_local_x = self.last_local_y = self.last_local_yaw = None
-        self.last_time = None
         self.get_logger().info(
-            f'Listening to Gazebo pose info for entity "{self.robot_entity_name}".')
+            f'Listening to Gazebo odometry on "{self.get_parameter("source_odom_topic").value}".')
 
-    def match_robot_transform(self, msg: TFMessage) -> Optional[TransformStamped]:
-        """Return the first transform matching the robot entity name."""
-        for transform in msg.transforms:
-            child_frame = transform.child_frame_id
-            if (child_frame == self.robot_entity_name or
-                    child_frame.startswith(self.robot_entity_name + '/') or
-                    child_frame.startswith(self.robot_entity_name + '::') or
-                    self.robot_entity_name in child_frame):
-                return transform
-        return None
-
-    def world_pose_callback(self, msg: TFMessage):
-        """Republish the robot ground truth pose and local odometry from Gazebo."""
-        robot_transform = self.match_robot_transform(msg)
-        if robot_transform is None:
-            return
-
-        stamp = robot_transform.header.stamp
+    def odom_callback(self, msg: Odometry):
+        """Republish Gazebo odometry as local odometry, TF, and ground-truth pose."""
+        stamp = msg.header.stamp
         if stamp.sec == 0 and stamp.nanosec == 0:
             stamp = self.get_clock().now().to_msg()
 
         pose_msg = PoseStamped()
         pose_msg.header.stamp = stamp
         pose_msg.header.frame_id = self.map_frame_id
-        pose_msg.pose.position.x = robot_transform.transform.translation.x
-        pose_msg.pose.position.y = robot_transform.transform.translation.y
-        pose_msg.pose.position.z = robot_transform.transform.translation.z
-        pose_msg.pose.orientation = robot_transform.transform.rotation
+        pose_msg.pose.position.x = msg.pose.pose.position.x
+        pose_msg.pose.position.y = msg.pose.pose.position.y
+        pose_msg.pose.position.z = msg.pose.pose.position.z
+        pose_msg.pose.orientation = msg.pose.pose.orientation
         self.pose_pub.publish(pose_msg)
 
-        world_x = robot_transform.transform.translation.x
-        world_y = robot_transform.transform.translation.y
-        world_yaw = self._yaw_from_rotation(robot_transform.transform.rotation)
+        world_x = msg.pose.pose.position.x
+        world_y = msg.pose.pose.position.y
+        world_yaw = self._yaw_from_rotation(msg.pose.pose.orientation)
         if self.origin_x is None:
             self.origin_x, self.origin_y, self.origin_yaw = world_x, world_y, world_yaw
 
@@ -89,15 +67,10 @@ class RobotGroundTruthPublisher(Node):
         local_y = dx * sin_yaw + dy * cos_yaw
         local_yaw = self._normalize_angle(world_yaw - self.origin_yaw)
         linear_x = linear_y = angular_z = 0.0
-        current_time = self._stamp_to_seconds(stamp)
-        if self.last_time is not None and current_time > self.last_time:
-            dt = current_time - self.last_time
-            linear_x, linear_y = self._velocity_in_base_frame(
-                (local_x - self.last_local_x) / dt,
-                (local_y - self.last_local_y) / dt,
-                local_yaw,
-            )
-            angular_z = self._normalize_angle(local_yaw - self.last_local_yaw) / dt
+        if self.origin_x is not None:
+            linear_x = msg.twist.twist.linear.x
+            linear_y = msg.twist.twist.linear.y
+            angular_z = msg.twist.twist.angular.z
 
         odom_msg = Odometry()
         odom_msg.header.stamp = stamp
@@ -120,14 +93,6 @@ class RobotGroundTruthPublisher(Node):
             tf_msg.transform.rotation.w = math.cos(local_yaw * 0.5)
             self.tf_broadcaster.sendTransform(tf_msg)
 
-        self.last_local_x, self.last_local_y, self.last_local_yaw = (
-            local_x, local_y, local_yaw)
-        self.last_time = current_time
-
-    @staticmethod
-    def _stamp_to_seconds(stamp) -> float:
-        return float(stamp.sec) + float(stamp.nanosec) * 1e-9
-
     @staticmethod
     def _yaw_from_rotation(rotation) -> float:
         return math.atan2(
@@ -142,17 +107,6 @@ class RobotGroundTruthPublisher(Node):
         while angle < -math.pi:
             angle += 2.0 * math.pi
         return angle
-
-    @staticmethod
-    def _velocity_in_base_frame(
-        linear_x: float, linear_y: float, yaw: float) -> tuple[float, float]:
-        """Express an odom-frame velocity in the robot base frame."""
-        cos_yaw, sin_yaw = math.cos(yaw), math.sin(yaw)
-        return (
-            cos_yaw * linear_x + sin_yaw * linear_y,
-            -sin_yaw * linear_x + cos_yaw * linear_y,
-        )
-
 
 def main(args=None):
     """Run the robot ground truth publisher node."""

@@ -10,7 +10,6 @@ from launch.substitutions import LaunchConfiguration, PythonExpression
 
 def generate_launch_description():
     bot_description = get_package_share_directory("bot_description")
-    bot_controller = get_package_share_directory("bot_controller")
     default_rviz_config = os.path.join(bot_description, "rviz", "display.rviz")
 
     model_arg = DeclareLaunchArgument(
@@ -22,14 +21,6 @@ def generate_launch_description():
         "world_name",
         default_value="empty",
         description="World file name (without .world extension)"
-    )
-    use_ground_truth_odom_arg = DeclareLaunchArgument(
-        "use_ground_truth_odom",
-        default_value="true",
-        description=(
-            "Use the controller configuration for an external odometry "
-            "source; it disables the controller odom TF publisher."
-        ),
     )
     publish_ground_truth_odom_arg = DeclareLaunchArgument(
         "publish_ground_truth_odom",
@@ -52,16 +43,9 @@ def generate_launch_description():
 
     model = LaunchConfiguration("model")
     world_name = LaunchConfiguration("world_name")
-    use_ground_truth_odom = LaunchConfiguration("use_ground_truth_odom")
     publish_ground_truth_odom = LaunchConfiguration("publish_ground_truth_odom")
     use_rviz = LaunchConfiguration("use_rviz")
     use_sim_time = LaunchConfiguration("use_sim_time")
-    controller_params_file = PythonExpression([
-        "'", os.path.join(bot_controller, "config", "bot_controller_ground_truth.yaml"),
-        "' if '", use_ground_truth_odom, "' == 'true' else '",
-        os.path.join(bot_controller, "config", "bot_controller.yaml"), "'"
-    ])
-
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(
@@ -73,24 +57,9 @@ def generate_launch_description():
         launch_arguments={
             'model': model,
             'world_name': world_name,
-            'controller_params_file': controller_params_file,
             'use_sim_time': use_sim_time,
         }.items()
     )
-
-    controller = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(
-                get_package_share_directory('bot_controller'),
-                'launch',
-                'controller.launch.py'
-            )
-        )
-    )
-
-    world_pose_topic = PythonExpression([
-        "'/world/' + '", world_name, "' + '/pose/info'"
-    ])
 
     ground_truth_odom = Node(
         package='bot_bringup',
@@ -98,8 +67,7 @@ def generate_launch_description():
         name='robot_ground_truth_publisher',
         parameters=[{
             'use_sim_time': use_sim_time,
-            'world_pose_topic': world_pose_topic,
-            'robot_entity_name': 'bot',
+            'source_odom_topic': '/odom_gz',
             'pose_topic': '/robot_pose_gt',
             'map_frame_id': 'map',
             'odom_topic': '/odom',
@@ -107,6 +75,14 @@ def generate_launch_description():
             'base_frame_id': 'base_link',
             'publish_tf': True,
         }],
+        condition=IfCondition(publish_ground_truth_odom),
+        output='screen',
+    )
+
+    map_to_odom = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        arguments=['0', '0', '0', '0', '0', '0', 'map', 'odom'],
         condition=IfCondition(publish_ground_truth_odom),
         output='screen',
     )
@@ -134,12 +110,11 @@ def generate_launch_description():
     return LaunchDescription([
         model_arg,
         world_name_arg,
-        use_ground_truth_odom_arg,
         publish_ground_truth_odom_arg,
         use_rviz_arg,
         use_sim_time_arg,
         gazebo,
-        controller,
         ground_truth_odom,
+        map_to_odom,
         rviz_node
     ])

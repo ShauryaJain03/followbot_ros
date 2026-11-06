@@ -20,23 +20,15 @@ from launch_ros.parameter_descriptions import ParameterValue
 
 def generate_launch_description():
     bot_description = get_package_share_directory("bot_description")
-    bot_controller = get_package_share_directory("bot_controller")
 
     use_sim_time = LaunchConfiguration("use_sim_time")
     model = LaunchConfiguration("model")
-    controller_params_file = LaunchConfiguration("controller_params_file")
     world_name = LaunchConfiguration("world_name")
 
     model_arg = DeclareLaunchArgument(
         name="model",
         default_value=os.path.join(bot_description, "urdf", "bot.urdf.xacro"),
         description="Absolute path to robot urdf file",
-    )
-
-    controller_params_arg = DeclareLaunchArgument(
-        name="controller_params_file",
-        default_value=os.path.join(bot_controller, "config", "bot_controller.yaml"),
-        description="Controller config file passed into ign_ros2_control",
     )
 
     world_name_arg = DeclareLaunchArgument(
@@ -65,8 +57,6 @@ def generate_launch_description():
         Command([
             "xacro ",
             model,
-            " controller_params_file:=",
-            controller_params_file,
         ]),
         value_type=str,
     )
@@ -87,17 +77,12 @@ def generate_launch_description():
         "'", default_world_directory, "/' + '", world_name, "' + '.world'"
     ])
 
-    world_pose_bridge = PythonExpression([
-        "'/world/' + '", world_name,
-        "' + '/pose/info@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V'"
-    ])
-
     spawn_x = PythonExpression([
-        "'-73.090393' if '", world_name,
+        "'-222.0' if '", world_name,
         "' == 'baylands' else '0.0'"
     ])
     spawn_y = PythonExpression([
-        "'-112.385361' if '", world_name,
+        "'-68.0' if '", world_name,
         "' == 'baylands' else '0.0'"
     ])
     spawn_z = PythonExpression([
@@ -119,16 +104,16 @@ def generate_launch_description():
         executable="parameter_bridge",
         arguments=[
             "/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock",
+            "/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist",
+            "/odom_gz@nav_msgs/msg/Odometry[gz.msgs.Odometry",
             "/imu@sensor_msgs/msg/Imu@gz.msgs.IMU",
             "/camera/camera_info@sensor_msgs/msg/CameraInfo@gz.msgs.CameraInfo",
             "/camera/depth_image@sensor_msgs/msg/Image@gz.msgs.Image",
             "/navsat@sensor_msgs/msg/NavSatFix@gz.msgs.NavSat",
             "/camera/points@sensor_msgs/msg/PointCloud2@gz.msgs.PointCloudPacked",
             "/drone_image@sensor_msgs/msg/Image@gz.msgs.Image",
-            "/cmd_vel@geometry_msgs/msg/Twist@gz.msgs.Twist",
-            world_pose_bridge,
-            "/scan@sensor_msgs/msg/LaserScan[ignition.msgs.LaserScan",
-            "/lidar_3d/points@sensor_msgs/msg/PointCloud2[ignition.msgs.PointCloudPacked",
+            "/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan",
+            "/lidar_3d/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked",
         ],
         parameters=[{
             # This process does not need simulated time. More importantly,
@@ -206,7 +191,6 @@ def generate_launch_description():
 
     return LaunchDescription([
         model_arg,
-        controller_params_arg,
         world_name_arg,
         use_sim_time_arg,
         gazebo_resource_path,
