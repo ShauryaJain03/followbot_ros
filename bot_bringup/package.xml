@@ -9,6 +9,9 @@
 
   <exec_depend>bot_controller</exec_depend>
   <exec_depend>bot_description</exec_depend>
+  <exec_depend>ground_segmentation_ros2</exec_depend>
+  <exec_depend>nav2_bringup</exec_depend>
+  <exec_depend>nav2_ground_consistency_costmap_plugin</exec_depend>
   <exec_depend>ament_index_python</exec_depend>
   <exec_depend>launch</exec_depend>
   <exec_depend>launch_ros</exec_depend>
