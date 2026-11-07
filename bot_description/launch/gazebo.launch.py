@@ -7,6 +7,7 @@ from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import (
     DeclareLaunchArgument,
+    ExecuteProcess,
     IncludeLaunchDescription,
     SetEnvironmentVariable,
     TimerAction,
@@ -95,8 +96,13 @@ def generate_launch_description():
             [os.path.join(get_package_share_directory("ros_gz_sim"), "launch"), "/gz_sim.launch.py"]
         ),
         launch_arguments={
-            "gz_args": PythonExpression(["'", world_path, " -v 4 -r'"])
+            "gz_args": PythonExpression(["'", world_path, " -v 4 -r -s'"])
         }.items(),
+    )
+
+    gazebo_gui = ExecuteProcess(
+        cmd=["gz", "sim", "-g"],
+        output="screen",
     )
 
     gz_ros2_bridge = Node(
@@ -107,12 +113,6 @@ def generate_launch_description():
             "/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist",
             "/odom_gz@nav_msgs/msg/Odometry[gz.msgs.Odometry",
             "/imu@sensor_msgs/msg/Imu@gz.msgs.IMU",
-            "/camera/camera_info@sensor_msgs/msg/CameraInfo@gz.msgs.CameraInfo",
-            "/camera/depth_image@sensor_msgs/msg/Image@gz.msgs.Image",
-            "/navsat@sensor_msgs/msg/NavSatFix@gz.msgs.NavSat",
-            "/camera/points@sensor_msgs/msg/PointCloud2@gz.msgs.PointCloudPacked",
-            "/drone_image@sensor_msgs/msg/Image@gz.msgs.Image",
-            "/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan",
             "/lidar_3d/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked",
         ],
         parameters=[{
@@ -125,20 +125,9 @@ def generate_launch_description():
             "qos_overrides./diff_drive_example.subscriber.reliability": "reliable",
         }],
         remappings=[
-            ("/scan", "/scan"),
             ("/lidar_3d/points", "/points"),
             ("/imu", "/imu_raw"),
         ],
-        output="screen",
-    )
-
-    ros_gz_image_bridge = Node(
-        package="ros_gz_image",
-        executable="image_bridge",
-        arguments=["/camera/image"],
-        parameters=[{
-            "use_sim_time": use_sim_time,
-        }],
         output="screen",
     )
 
@@ -189,6 +178,12 @@ def generate_launch_description():
         actions=[pointcloud_transform],
     )
 
+    delayed_gui = TimerAction(
+        # shortcut: fixed delay assumes Baylands loads within 15 s; replace with an entity-created event if world loading becomes variable.
+        period=15.0,
+        actions=[gazebo_gui],
+    )
+
     return LaunchDescription([
         model_arg,
         world_name_arg,
@@ -197,7 +192,7 @@ def generate_launch_description():
         robot_state_publisher_node,
         gazebo,
         gz_ros2_bridge,
-        ros_gz_image_bridge,
         delayed_spawn,
         delayed_processing,
+        delayed_gui,
     ])

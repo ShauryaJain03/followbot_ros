@@ -150,6 +150,7 @@
 
   <gazebo reference="rgbd_camera">
     <sensor name="rgbd_camera" type="rgbd_camera">
+      <!-- shortcut: RGB-D is disabled during LiDAR terrain validation; re-enable with its bridge for person tracking. -->
       <camera>
         <horizontal_fov>1.10</horizontal_fov>
         <image>
@@ -162,9 +163,9 @@
         </clip>
         <optical_frame_id>camera_link_optical</optical_frame_id>
       </camera>
-      <always_on>1</always_on>
+      <always_on>0</always_on>
       <update_rate>20</update_rate>
-      <visualize>true</visualize>
+      <visualize>false</visualize>
       <topic>camera</topic>
       <gz_frame_id>rgbd_camera</gz_frame_id>
     </sensor>
@@ -206,7 +207,7 @@
   <gazebo reference="laser_link">
     <sensor name="lidar" type="gpu_lidar">
       <always_on>true</always_on>
-      <visualize>true</visualize>
+      <visualize>false</visualize>
       <topic>scan</topic>
       <update_rate>5</update_rate>
       <gz_frame_id>laser_link</gz_frame_id>
@@ -236,7 +237,7 @@
   <gazebo reference="laser_link">
     <sensor type="gpu_lidar" name="generic_lidar_sensor">
       <update_rate>5</update_rate>
-      <visualize>true</visualize>
+      <visualize>false</visualize>
       <always_on>true</always_on>
       <frame_id>laser_link</frame_id>
       <gz_frame_id>laser_link</gz_frame_id>
@@ -297,8 +298,8 @@
           <stddev>0.02</stddev>
         </noise>
       </ray>
-      <always_on>1</always_on>
-      <visualize>true</visualize>
+      <always_on>false</always_on>
+      <visualize>false</visualize>
     </sensor>
   </gazebo>
 
@@ -327,7 +328,7 @@
       <gz_frame_id>imu_link</gz_frame_id>
       <always_on>true</always_on>
       <update_rate>100</update_rate>
-      <visualize>true</visualize>
+      <visualize>false</visualize>
      <imu>
      	<angular_velocity>
      	  <x>
