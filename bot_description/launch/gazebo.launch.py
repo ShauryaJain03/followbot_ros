@@ -2,7 +2,7 @@ import os
 from os import pathsep
 from pathlib import Path
 
-from ament_index_python.packages import get_package_share_directory
+from ament_index_python.packages import get_package_prefix, get_package_share_directory
 
 from launch import LaunchDescription
 from launch.actions import (
@@ -21,6 +21,8 @@ from launch_ros.parameter_descriptions import ParameterValue
 
 def generate_launch_description():
     bot_description = get_package_share_directory("bot_description")
+    actor_plugin_share = get_package_share_directory("gazebo_ros_actor_plugin")
+    actor_plugin_prefix = get_package_prefix("gazebo_ros_actor_plugin")
 
     use_sim_time = LaunchConfiguration("use_sim_time")
     model = LaunchConfiguration("model")
@@ -47,11 +49,20 @@ def generate_launch_description():
     model_paths = [
         str(Path(bot_description).parent.resolve()),
         os.path.join(bot_description, "models"),
+        os.path.join(actor_plugin_share, "config", "skins"),
     ]
 
     gazebo_resource_path = SetEnvironmentVariable(
         "GZ_SIM_RESOURCE_PATH",
         pathsep.join(model_paths),
+    )
+
+    actor_plugin_path = SetEnvironmentVariable(
+        "GZ_SIM_SYSTEM_PLUGIN_PATH",
+        pathsep.join([
+            os.path.join(actor_plugin_prefix, "lib"),
+            os.environ.get("GZ_SIM_SYSTEM_PLUGIN_PATH", ""),
+        ]),
     )
 
     robot_description = ParameterValue(
@@ -79,16 +90,16 @@ def generate_launch_description():
     ])
 
     spawn_x = PythonExpression([
-        "'-222.0' if '", world_name,
+        "'-73.090393' if '", world_name,
         "' == 'baylands' else '0.0'"
     ])
     spawn_y = PythonExpression([
-        "'-68.0' if '", world_name,
+        "'-112.385361' if '", world_name,
         "' == 'baylands' else '0.0'"
     ])
     spawn_z = PythonExpression([
-        "'5.4' if '", world_name,
-        "' == 'baylands' else '0.4'"
+        "'5.0' if '", world_name,
+        "' == 'baylands' else '5.0'"
     ])
 
     gazebo = IncludeLaunchDescription(
@@ -111,6 +122,9 @@ def generate_launch_description():
         arguments=[
             "/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock",
             "/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist",
+            "/person/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist",
+            "/person/path@geometry_msgs/msg/PoseArray]gz.msgs.Pose_V",
+            "/person/ground_truth@geometry_msgs/msg/PoseStamped[gz.msgs.Pose",
             "/odom_gz@nav_msgs/msg/Odometry[gz.msgs.Odometry",
             "/imu@sensor_msgs/msg/Imu@gz.msgs.IMU",
             "/lidar_3d/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked",
@@ -189,6 +203,7 @@ def generate_launch_description():
         world_name_arg,
         use_sim_time_arg,
         gazebo_resource_path,
+        actor_plugin_path,
         robot_state_publisher_node,
         gazebo,
         gz_ros2_bridge,

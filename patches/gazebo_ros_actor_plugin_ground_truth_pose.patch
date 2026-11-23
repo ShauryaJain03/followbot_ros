@@ -1,0 +1,92 @@
+diff --git a/include/gazebo_ros_actor_plugin/gazebo_ros_actor_command.h b/include/gazebo_ros_actor_plugin/gazebo_ros_actor_command.h
+index 00a4b84..a1a90c9 100644
+--- a/include/gazebo_ros_actor_plugin/gazebo_ros_actor_command.h
++++ b/include/gazebo_ros_actor_plugin/gazebo_ros_actor_command.h
+@@ -26,6 +26,7 @@
+ #include <gz/sim/components/Name.hh>
+ #include <gz/sim/components/Pose.hh>
+ #include <gz/msgs/pose_v.pb.h>
++#include <gz/msgs/pose.pb.h>
+ #include <gz/msgs/twist.pb.h>
+ #include <gz/transport/Node.hh>
+ 
+@@ -50,11 +51,14 @@ class GazeboRosActorCommand :
+  private:
+    void VelCallback(const gz::msgs::Twist &msg);
+    void PathCallback(const gz::msgs::Pose_V &msg);
++   void PublishPose(const gz::math::Pose3d &pose);
+    void ChooseNewTarget();
+ 
+    gz::transport::Node node_;
+    std::string velTopic_;
+    std::string pathTopic_;
++   std::string poseTopic_;
++   gz::transport::Node::Publisher posePub_;
+    gz::sim::Entity actorEntity_;
+    double animationFactor_;
+    std::chrono::steady_clock::duration lastUpdate_;
+diff --git a/src/gazebo_ros_actor_command.cpp b/src/gazebo_ros_actor_command.cpp
+index 3e69be5..5e3fdfe 100644
+--- a/src/gazebo_ros_actor_command.cpp
++++ b/src/gazebo_ros_actor_command.cpp
+@@ -41,6 +41,9 @@ void GazeboRosActorCommand::Configure(
+   if (_sdf->HasElement("path_topic")) {
+     this->pathTopic_ = _sdf->Get<std::string>("path_topic");
+   }
++  if (_sdf->HasElement("pose_topic")) {
++    this->poseTopic_ = _sdf->Get<std::string>("pose_topic");
++  }
+   if (_sdf->HasElement("linear_tolerance")) {
+     this->linTolerance_ = _sdf->Get<double>("linear_tolerance");
+   }
+@@ -141,6 +144,10 @@ void GazeboRosActorCommand::Configure(
+     gzerr << "Failed to subscribe to path topic: " << this->pathTopic_ << std::endl;
+   }
+ 
++  if (!this->poseTopic_.empty()) {
++    this->posePub_ = this->node_.Advertise<gz::msgs::Pose>(this->poseTopic_);
++  }
++
+   this->lastUpdate_ = std::chrono::steady_clock::duration::zero();
+ }
+ 
+@@ -216,6 +223,7 @@ void GazeboRosActorCommand::PreUpdate(
+ 
+     if (this->targetPoses_.empty() || this->idx_ >= static_cast<int>(this->targetPoses_.size())) {
+       this->lastUpdate_ = _info.simTime;
++      this->PublishPose(actorPose);
+       return;
+     }
+ 
+@@ -285,6 +293,8 @@ void GazeboRosActorCommand::PreUpdate(
+ 
+   *trajPoseComp = gz::sim::components::TrajectoryPose(newPose);
+ 
++  this->PublishPose(newPose);
++
+   _ecm.SetChanged(
+     this->actorEntity_,
+     gz::sim::components::TrajectoryPose::typeId,
+@@ -308,6 +318,22 @@ void GazeboRosActorCommand::PreUpdate(
+   }
+ }
+ 
++void GazeboRosActorCommand::PublishPose(const gz::math::Pose3d &pose) {
++  if (this->poseTopic_.empty()) {
++    return;
++  }
++
++  gz::msgs::Pose poseMsg;
++  poseMsg.mutable_position()->set_x(pose.Pos().X());
++  poseMsg.mutable_position()->set_y(pose.Pos().Y());
++  poseMsg.mutable_position()->set_z(pose.Pos().Z());
++  poseMsg.mutable_orientation()->set_x(pose.Rot().X());
++  poseMsg.mutable_orientation()->set_y(pose.Rot().Y());
++  poseMsg.mutable_orientation()->set_z(pose.Rot().Z());
++  poseMsg.mutable_orientation()->set_w(pose.Rot().W());
++  this->posePub_.Publish(poseMsg);
++}
++
+ void GazeboRosActorCommand::ChooseNewTarget() {
+   this->idx_++;
+ 

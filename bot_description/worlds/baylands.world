@@ -109,5 +109,23 @@
             <uri>model://baylands</uri>
             <pose>-2.0 2 0 0 0 0</pose>
         </include>
+
+        <include>
+            <name>person</name>
+            <uri>model://DoctorFemaleWalk</uri>
+            <!-- Actors are kinematic, unlike the robot; place this at the
+                 Baylands terrain height instead of the robot's drop height. -->
+            <pose>-70.090393 -112.385361 0.05 0 0 0</pose>
+            <plugin filename="libgazebo_ros_actor_plugin.so"
+                    name="gazebo_ros_actor_plugin::GazeboRosActorCommand">
+                <follow_mode>path</follow_mode>
+                <vel_topic>/person/cmd_vel</vel_topic>
+                <path_topic>/person/path</path_topic>
+                <pose_topic>/person/ground_truth</pose_topic>
+                <animation_factor>1.0</animation_factor>
+                <linear_tolerance>0.1</linear_tolerance>
+                <linear_velocity>0.20</linear_velocity>
+            </plugin>
+        </include>
     </world>
 </sdf>

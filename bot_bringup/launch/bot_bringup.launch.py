@@ -87,6 +87,23 @@ def generate_launch_description():
         output='screen',
     )
 
+    person_ground_truth = Node(
+        package='bot_bringup',
+        executable='person_ground_truth_publisher',
+        name='person_ground_truth_publisher',
+        parameters=[{
+            'use_sim_time': use_sim_time,
+            'source_pose_topic': '/person/ground_truth',
+            'pose_topic': '/person_pose',
+            # The robot odometry publisher uses this Baylands spawn as its
+            # local origin, so the actor must use the same origin for Nav2.
+            'world_origin_x': -73.090393,
+            'world_origin_y': -112.385361,
+            'world_origin_yaw': 0.0,
+        }],
+        output='screen',
+    )
+
     rviz_node = TimerAction(
         period=10.0,
         actions=[
@@ -115,6 +132,7 @@ def generate_launch_description():
         use_sim_time_arg,
         gazebo,
         ground_truth_odom,
+        person_ground_truth,
         map_to_odom,
         rviz_node
     ])

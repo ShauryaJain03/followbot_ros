@@ -27,6 +27,8 @@ setup(
         'console_scripts': [
             'robot_ground_truth_publisher = '
             'bot_bringup.robot_ground_truth_publisher:main',
+            'person_ground_truth_publisher = '
+            'bot_bringup.person_ground_truth_publisher:main',
         ],
     },
 )
