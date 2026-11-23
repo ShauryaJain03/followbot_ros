@@ -5,6 +5,9 @@ bt_navigator:
 
 controller_server:
   ros__parameters:
+    # The terrain GridMap arrives at 2 Hz and can take up to ~0.8 s under load.
+    controller_frequency: 10.0
+    costmap_update_timeout: 1.0
     progress_checker_plugins: ["progress_checker"]
     goal_checker_plugins: ["goal_checker"]
     controller_plugins: ["FollowPath"]
@@ -54,8 +57,13 @@ following_server:
       v_linear_max: 0.25
       v_angular_max: 0.8
       slowdown_radius: 0.15
-      use_collision_detection: false
+      use_collision_detection: true
+      costmap_topic: /local_costmap/costmap_raw
+      footprint_topic: /local_costmap/published_footprint
       transform_tolerance: 0.1
+      projection_time: 2.0
+      simulation_time_step: 0.1
+      dock_collision_threshold: 0.3
 
 local_costmap:
   local_costmap:
@@ -69,25 +77,39 @@ local_costmap:
       height: 30
       resolution: 0.3
       footprint: "[[0.78, 0.60], [0.78, -0.60], [-0.78, -0.60], [-0.78, 0.60]]"
-      plugins: ["ground_consistency", "inflation_layer"]
+      plugins: ["ground_consistency", "traversability", "inflation_layer"]
       ground_consistency:
         plugin: nav2_ground_consistency_costmap_plugin::GroundConsistencyLayer
         ground_points_topic: /ground_segmentation/ground_points
         nonground_points_topic: /ground_segmentation/obstacle_points
         tf_timeout: 0.5
-        min_clearance: 0.1
+        # Match the validated terrain step limit: smaller height changes are terrain.
+        min_clearance: 0.20
         robot_height: 1.0
         maximum_height_filter: 2.0
-        ground_inc: 1.0
-        nonground_inc: 1.5
-        nonground_decay: 0.93
-        ground_decay: 0.80
+        ground_inc: 1.25
+        nonground_inc: 1.0
+        nonground_decay: 0.85
+        ground_decay: 0.90
         max_score: 5000.0
-        nonground_occ_thresh: 6.0
-        nonground_prob_thresh: 0.75
+        nonground_occ_thresh: 8.0
+        nonground_prob_thresh: 0.85
         discretize_costs: true
         max_data_range: 30.0
-        ground_neighbor_search_cells: 0
+        ground_neighbor_search_cells: 2
+      traversability:
+        plugin: nav2_gridmap_traversability_layer::TraversabilityLayer
+        enabled: true
+        topic: /followbot_traversability/terrain_map
+        traversability_layer: traversability
+        # Calibrated geometric score: only a hard geometric limit is lethal.
+        traversability_lethal: 0.001
+        traversability_free: 0.55
+        traversability_gamma: 3.0
+        max_cost: 90.0
+        edge_margin_m: 1.0
+        qos_reliability: reliable
+        grace_period_s: 10.0
       inflation_layer:
         plugin: nav2_costmap_2d::InflationLayer
         enabled: true
@@ -152,15 +174,17 @@ collision_monitor:
     FollowBotFootprint:
       type: polygon
       action_type: stop
-      points: "[[-0.78, -0.60], [-0.78, 0.60], [0.78, 0.60], [0.78, -0.60]]"
+      # Stop before an obstacle reaches the physical footprint. Following
+      # Server commands velocity directly, so Collision Monitor is the brake.
+      points: "[[-0.90, -0.80], [-0.90, 0.80], [1.50, 0.80], [1.50, -0.80]]"
       visualize: true
       enabled: true
     observation_sources: ["pointcloud"]
     pointcloud:
       type: pointcloud
       topic: /ground_segmentation/obstacle_points
-      min_height: 0.1
-      max_height: 1.0
+      min_height: 0.2
+      max_height: 2.0
       enabled: true
 
 docking_server:

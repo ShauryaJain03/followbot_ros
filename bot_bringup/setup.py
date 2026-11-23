@@ -29,6 +29,8 @@ setup(
             'bot_bringup.robot_ground_truth_publisher:main',
             'person_ground_truth_publisher = '
             'bot_bringup.person_ground_truth_publisher:main',
+            'analytic_traversability = '
+            'bot_bringup.analytic_traversability:main',
         ],
     },
 )

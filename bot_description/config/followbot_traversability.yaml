@@ -1,0 +1,9 @@
+/analytic_traversability:
+  ros__parameters:
+    # Conservative relative to the 0.28 m wheels, while allowing Baylands'
+    # normal uneven but driveable ground.
+    max_slope_degrees: 38.0
+    max_step_height_m: 0.20
+    max_roughness_m: 0.08
+    roughness_radius_m: 0.4
+    min_roughness_points: 12

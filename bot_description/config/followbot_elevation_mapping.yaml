@@ -1,0 +1,20 @@
+/elevation_mapping_node:
+  ros__parameters:
+    map_frame: odom
+    base_frame: base_link
+    corrected_map_frame: odom
+    resolution: 0.2
+    map_length: 20.0
+    map_acquire_fps: 2.0
+    update_pose_fps: 5.0
+    max_ray_length: 15.0
+    enable_drift_compensation: false
+    subscribers:
+      lidar:
+        topic_name: /points
+        data_type: pointcloud
+    publishers:
+      terrain_map:
+        layers: [elevation, variance, traversability]
+        basic_layers: [elevation]
+        fps: 2.0

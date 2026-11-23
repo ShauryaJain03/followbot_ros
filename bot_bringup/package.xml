@@ -13,6 +13,8 @@
   <exec_depend>nav2_bringup</exec_depend>
   <exec_depend>nav2_ground_consistency_costmap_plugin</exec_depend>
   <exec_depend>opennav_following</exec_depend>
+  <exec_depend>elevation_mapping_cupy</exec_depend>
+  <exec_depend>nav2_gridmap_traversability_layer</exec_depend>
   <exec_depend>ament_index_python</exec_depend>
   <exec_depend>launch</exec_depend>
   <exec_depend>launch_ros</exec_depend>
@@ -21,6 +23,7 @@
   <exec_depend>tf2_ros</exec_depend>
   <exec_depend>rviz2</exec_depend>
   <exec_depend>rclpy</exec_depend>
+  <exec_depend>grid_map_msgs</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>nav_msgs</exec_depend>
   <exec_depend>tf2_msgs</exec_depend>
